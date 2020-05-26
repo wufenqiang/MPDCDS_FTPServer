@@ -147,6 +147,287 @@ var (
 //	}
 //}
 
+//张志海********************************************************************************************************************************
+type commandMlsd struct{}
+
+func (cmd commandMlsd) IsExtend() bool {
+	return false
+}
+func (cmd commandMlsd) RequireParam() bool {
+	return false
+}
+func (cmd commandMlsd) RequireAuth() bool {
+	return false
+}
+func (cmd commandMlsd) Execute(conn *Conn, param string) {
+}
+
+// commandList responds to the LIST FTP command. It allows the client to retreive
+// a detailed listing of the contents of a directory.
+type commandList struct{}
+
+func (cmd commandList) IsExtend() bool {
+	return false
+}
+func (cmd commandList) RequireParam() bool {
+	return false
+}
+func (cmd commandList) RequireAuth() bool {
+	return true
+}
+func (cmd commandList) Execute(conn *Conn, param string) {
+	path := conn.buildPath(parseListParam(param))
+	info, err := conn.driver.Stat(path)
+	if err != nil {
+		conn.writeMessage(550, err.Error())
+		return
+	}
+
+	if info == nil {
+		conn.logger.Printf(conn.sessionID, "%s: no such file or directory.\n", path)
+		return
+	}
+	var files []FileInfo
+	if info.IsDir() {
+		err = conn.driver.ListDir(path, func(f FileInfo) error {
+			files = append(files, f)
+			return nil
+		})
+		if err != nil {
+			conn.writeMessage(550, err.Error())
+			return
+		}
+	} else {
+		files = append(files, info)
+	}
+
+	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+	conn.sendOutofbandData(listFormatter(files).Detailed())
+}
+func parseListParam(param string) (path string) {
+	if len(param) == 0 {
+		path = param
+	} else {
+		fields := strings.Fields(param)
+		i := 0
+		for _, field := range fields {
+			if !strings.HasPrefix(field, "-") {
+				break
+			}
+			i = strings.LastIndex(param, " "+field) + len(field) + 1
+		}
+		path = strings.TrimLeft(param[i:], " ") //Get all the path even with space inside
+	}
+	return path
+}
+
+// commandNlst responds to the NLST FTP command. It allows the client to
+// retreive a list of filenames in the current directory.
+type commandNlst struct{}
+
+func (cmd commandNlst) IsExtend() bool {
+	return false
+}
+func (cmd commandNlst) RequireParam() bool {
+	return false
+}
+func (cmd commandNlst) RequireAuth() bool {
+	return true
+}
+func (cmd commandNlst) Execute(conn *Conn, param string) {
+	path := conn.buildPath(parseListParam(param))
+	info, err := conn.driver.Stat(path)
+	if err != nil {
+		conn.writeMessage(550, err.Error())
+		return
+	}
+	if !info.IsDir() {
+		conn.writeMessage(550, param+" is not a directory")
+		return
+	}
+
+	var files []FileInfo
+	err = conn.driver.ListDir(path, func(f FileInfo) error {
+		files = append(files, f)
+		return nil
+	})
+	if err != nil {
+		conn.writeMessage(550, err.Error())
+		return
+	}
+	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+	conn.sendOutofbandData(listFormatter(files).Short())
+}
+
+//********************************************************************************************************************************
+
+//吴奋强********************************************************************************************************************************
+//
+type commandRetr struct{}
+
+func (cmd commandRetr) IsExtend() bool {
+	return false
+}
+func (cmd commandRetr) RequireParam() bool {
+	return true
+}
+func (cmd commandRetr) RequireAuth() bool {
+	return true
+}
+func (cmd commandRetr) Execute(conn *Conn, param string) {
+	path := conn.buildPath(param)
+	defer func() {
+		conn.lastFilePos = 0
+		conn.appendData = false
+	}()
+	bytes, data, err := conn.driver.GetFile(path, conn.lastFilePos)
+	if err == nil {
+		defer data.Close()
+		conn.writeMessage(150, fmt.Sprintf("Data transfer starting %v bytes", bytes))
+		err = conn.sendOutofBandDataWriter(data)
+		if err != nil {
+			conn.writeMessage(551, "Error reading file")
+		}
+	} else {
+		conn.writeMessage(551, "File not available")
+	}
+}
+
+//
+type commandPass struct{}
+
+func (cmd commandPass) IsExtend() bool {
+	return false
+}
+func (cmd commandPass) RequireParam() bool {
+	return true
+}
+func (cmd commandPass) RequireAuth() bool {
+	return false
+}
+func (cmd commandPass) Execute(conn *Conn, param string) {
+	ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
+	if err != nil {
+		conn.writeMessage(550, "Checking password error")
+		return
+	}
+
+	if ok {
+		conn.user = conn.reqUser
+		conn.reqUser = ""
+		conn.writeMessage(230, "Password ok, continue")
+	} else {
+		conn.writeMessage(530, "Incorrect password, not logged in")
+	}
+}
+
+//
+type commandFeat struct{}
+
+func (cmd commandFeat) IsExtend() bool {
+	return false
+}
+func (cmd commandFeat) RequireParam() bool {
+	return false
+}
+func (cmd commandFeat) RequireAuth() bool {
+	return false
+}
+
+var (
+	feats    = "Extensions supported:\n%s"
+	featCmds = " UTF8\n"
+)
+
+func init() {
+	for k, v := range commands {
+		if v.IsExtend() {
+			featCmds = featCmds + " " + k + "\n"
+		}
+	}
+}
+func (cmd commandFeat) Execute(conn *Conn, param string) {
+	conn.writeMessageMultiline(211, conn.server.feats)
+}
+
+//
+type commandClnt struct{}
+
+func (cmd commandClnt) IsExtend() bool {
+	return false
+}
+func (cmd commandClnt) RequireParam() bool {
+	return false
+}
+func (cmd commandClnt) RequireAuth() bool {
+	return false
+}
+func (cmd commandClnt) Execute(conn *Conn, param string) {
+}
+
+//********************************************************************************************************************************
+
+//黄欣********************************************************************************************************************************
+// commandCwd responds to the CWD FTP command. It allows the client to change the
+// current working directory.
+type commandCwd struct{}
+
+func (cmd commandCwd) IsExtend() bool {
+	return false
+}
+func (cmd commandCwd) RequireParam() bool {
+	return true
+}
+func (cmd commandCwd) RequireAuth() bool {
+	return true
+}
+func (cmd commandCwd) Execute(conn *Conn, param string) {
+	path := conn.buildPath(param)
+	err := conn.driver.ChangeDir(path)
+	if err == nil {
+		conn.namePrefix = path
+		conn.writeMessage(250, "Directory changed to "+path)
+	} else {
+		conn.writeMessage(550, fmt.Sprint("Directory change to ", path, " failed: ", err))
+	}
+}
+
+// commandPwd responds to the PWD FTP command.
+//
+// Tells the client what the current working directory is.
+type commandPwd struct{}
+
+func (cmd commandPwd) IsExtend() bool {
+	return false
+}
+func (cmd commandPwd) RequireParam() bool {
+	return false
+}
+func (cmd commandPwd) RequireAuth() bool {
+	return true
+}
+func (cmd commandPwd) Execute(conn *Conn, param string) {
+	conn.writeMessage(257, "\""+conn.namePrefix+"\" is the current directory")
+}
+
+//
+type commandHelp struct{}
+
+func (cmd commandHelp) IsExtend() bool {
+	return false
+}
+func (cmd commandHelp) RequireParam() bool {
+	return true
+}
+func (cmd commandHelp) RequireAuth() bool {
+	return true
+}
+func (cmd commandHelp) Execute(conn *Conn, param string) {
+
+}
+
+//********************************************************************************************************************************
+
 type commandOpts struct{}
 
 func (cmd commandOpts) IsExtend() bool {
@@ -176,62 +457,6 @@ func (cmd commandOpts) Execute(conn *Conn, param string) {
 	}
 }
 
-type commandFeat struct{}
-
-func (cmd commandFeat) IsExtend() bool {
-	return false
-}
-func (cmd commandFeat) RequireParam() bool {
-	return false
-}
-func (cmd commandFeat) RequireAuth() bool {
-	return false
-}
-
-var (
-	feats    = "Extensions supported:\n%s"
-	featCmds = " UTF8\n"
-)
-
-func init() {
-	for k, v := range commands {
-		if v.IsExtend() {
-			featCmds = featCmds + " " + k + "\n"
-		}
-	}
-}
-func (cmd commandFeat) Execute(conn *Conn, param string) {
-	conn.writeMessageMultiline(211, conn.server.feats)
-}
-
-type commandClnt struct{}
-
-func (cmd commandClnt) IsExtend() bool {
-	return false
-}
-func (cmd commandClnt) RequireParam() bool {
-	return false
-}
-func (cmd commandClnt) RequireAuth() bool {
-	return false
-}
-func (cmd commandClnt) Execute(conn *Conn, param string) {
-}
-
-type commandMlsd struct{}
-
-func (cmd commandMlsd) IsExtend() bool {
-	return false
-}
-func (cmd commandMlsd) RequireParam() bool {
-	return false
-}
-func (cmd commandMlsd) RequireAuth() bool {
-	return false
-}
-func (cmd commandMlsd) Execute(conn *Conn, param string) {
-}
-
 // cmdCdup responds to the CDUP FTP command.
 //
 // Allows the client change their current directory to the parent.
@@ -253,48 +478,6 @@ func (cmd commandMlsd) Execute(conn *Conn, param string) {
 //	otherCmd := &commandCwd{}
 //	otherCmd.Execute(conn, "..")
 //}
-
-// commandCwd responds to the CWD FTP command. It allows the client to change the
-// current working directory.
-type commandCwd struct{}
-
-func (cmd commandCwd) IsExtend() bool {
-	return false
-}
-
-func (cmd commandCwd) RequireParam() bool {
-	return true
-}
-
-func (cmd commandCwd) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandCwd) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	err := conn.driver.ChangeDir(path)
-	if err == nil {
-		conn.namePrefix = path
-		conn.writeMessage(250, "Directory changed to "+path)
-	} else {
-		conn.writeMessage(550, fmt.Sprint("Directory change to ", path, " failed: ", err))
-	}
-}
-
-type commandHelp struct{}
-
-func (cmd commandHelp) IsExtend() bool {
-	return false
-}
-func (cmd commandHelp) RequireParam() bool {
-	return true
-}
-func (cmd commandHelp) RequireAuth() bool {
-	return true
-}
-func (cmd commandHelp) Execute(conn *Conn, param string) {
-
-}
 
 // commandDele responds to the DELE FTP command. It allows the client to delete
 // a file
@@ -451,106 +634,6 @@ func (cmd commandHelp) Execute(conn *Conn, param string) {
 //	conn.writeMessage(229, msg)
 //}
 
-// commandList responds to the LIST FTP command. It allows the client to retreive
-// a detailed listing of the contents of a directory.
-type commandList struct{}
-
-func (cmd commandList) IsExtend() bool {
-	return false
-}
-func (cmd commandList) RequireParam() bool {
-	return false
-}
-func (cmd commandList) RequireAuth() bool {
-	return true
-}
-func (cmd commandList) Execute(conn *Conn, param string) {
-	path := conn.buildPath(parseListParam(param))
-	info, err := conn.driver.Stat(path)
-	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
-	}
-
-	if info == nil {
-		conn.logger.Printf(conn.sessionID, "%s: no such file or directory.\n", path)
-		return
-	}
-	var files []FileInfo
-	if info.IsDir() {
-		err = conn.driver.ListDir(path, func(f FileInfo) error {
-			files = append(files, f)
-			return nil
-		})
-		if err != nil {
-			conn.writeMessage(550, err.Error())
-			return
-		}
-	} else {
-		files = append(files, info)
-	}
-
-	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
-	conn.sendOutofbandData(listFormatter(files).Detailed())
-}
-func parseListParam(param string) (path string) {
-	if len(param) == 0 {
-		path = param
-	} else {
-		fields := strings.Fields(param)
-		i := 0
-		for _, field := range fields {
-			if !strings.HasPrefix(field, "-") {
-				break
-			}
-			i = strings.LastIndex(param, " "+field) + len(field) + 1
-		}
-		path = strings.TrimLeft(param[i:], " ") //Get all the path even with space inside
-	}
-	return path
-}
-
-// commandNlst responds to the NLST FTP command. It allows the client to
-// retreive a list of filenames in the current directory.
-type commandNlst struct{}
-
-func (cmd commandNlst) IsExtend() bool {
-	return false
-}
-
-func (cmd commandNlst) RequireParam() bool {
-	return false
-}
-
-func (cmd commandNlst) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandNlst) Execute(conn *Conn, param string) {
-	path := conn.buildPath(parseListParam(param))
-	info, err := conn.driver.Stat(path)
-	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
-	}
-	if !info.IsDir() {
-		conn.writeMessage(550, param+" is not a directory")
-		return
-	}
-
-	var files []FileInfo
-	err = conn.driver.ListDir(path, func(f FileInfo) error {
-		files = append(files, f)
-		return nil
-	})
-	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
-	}
-	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
-	conn.sendOutofbandData(listFormatter(files).Short())
-}
-
 // commandMdtm responds to the MDTM FTP command. It allows the client to
 // retreive the last modified time of a file.
 //type commandMdtm struct{}
@@ -655,35 +738,6 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 
 // commandPass respond to the PASS FTP command by asking the driver if the
 // supplied username and password are valid
-type commandPass struct{}
-
-func (cmd commandPass) IsExtend() bool {
-	return false
-}
-
-func (cmd commandPass) RequireParam() bool {
-	return true
-}
-
-func (cmd commandPass) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandPass) Execute(conn *Conn, param string) {
-	ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	if err != nil {
-		conn.writeMessage(550, "Checking password error")
-		return
-	}
-
-	if ok {
-		conn.user = conn.reqUser
-		conn.reqUser = ""
-		conn.writeMessage(230, "Password ok, continue")
-	} else {
-		conn.writeMessage(530, "Incorrect password, not logged in")
-	}
-}
 
 // commandPasv responds to the PASV FTP command.
 //
@@ -694,15 +748,12 @@ type commandPasv struct{}
 func (cmd commandPasv) IsExtend() bool {
 	return false
 }
-
 func (cmd commandPasv) RequireParam() bool {
 	return false
 }
-
 func (cmd commandPasv) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandPasv) Execute(conn *Conn, param string) {
 	listenIP := conn.passiveListenIP()
 	socket, err := newPassiveSocket(listenIP, conn.PassivePort, conn.logger, conn.sessionID, conn.tlsConfig)
@@ -728,15 +779,12 @@ type commandPort struct{}
 func (cmd commandPort) IsExtend() bool {
 	return false
 }
-
 func (cmd commandPort) RequireParam() bool {
 	return true
 }
-
 func (cmd commandPort) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandPort) Execute(conn *Conn, param string) {
 	nums := strings.Split(param, ",")
 	portOne, _ := strconv.Atoi(nums[4])
@@ -752,27 +800,6 @@ func (cmd commandPort) Execute(conn *Conn, param string) {
 	conn.writeMessage(200, "Connection established ("+strconv.Itoa(port)+")")
 }
 
-// commandPwd responds to the PWD FTP command.
-//
-// Tells the client what the current working directory is.
-type commandPwd struct{}
-
-func (cmd commandPwd) IsExtend() bool {
-	return false
-}
-
-func (cmd commandPwd) RequireParam() bool {
-	return false
-}
-
-func (cmd commandPwd) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandPwd) Execute(conn *Conn, param string) {
-	conn.writeMessage(257, "\""+conn.namePrefix+"\" is the current directory")
-}
-
 //CommandQuit responds to the QUIT FTP command. The client has requested the
 //connection be closed.
 type commandQuit struct{}
@@ -780,15 +807,12 @@ type commandQuit struct{}
 func (cmd commandQuit) IsExtend() bool {
 	return false
 }
-
 func (cmd commandQuit) RequireParam() bool {
 	return false
 }
-
 func (cmd commandQuit) RequireAuth() bool {
 	return false
 }
-
 func (cmd commandQuit) Execute(conn *Conn, param string) {
 	conn.writeMessage(221, "Goodbye")
 	conn.Close()
@@ -796,38 +820,6 @@ func (cmd commandQuit) Execute(conn *Conn, param string) {
 
 // commandRetr responds to the RETR FTP command. It allows the client to
 // download a file.
-type commandRetr struct{}
-
-func (cmd commandRetr) IsExtend() bool {
-	return false
-}
-
-func (cmd commandRetr) RequireParam() bool {
-	return true
-}
-
-func (cmd commandRetr) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandRetr) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	defer func() {
-		conn.lastFilePos = 0
-		conn.appendData = false
-	}()
-	bytes, data, err := conn.driver.GetFile(path, conn.lastFilePos)
-	if err == nil {
-		defer data.Close()
-		conn.writeMessage(150, fmt.Sprintf("Data transfer starting %v bytes", bytes))
-		err = conn.sendOutofBandDataWriter(data)
-		if err != nil {
-			conn.writeMessage(551, "Error reading file")
-		}
-	} else {
-		conn.writeMessage(551, "File not available")
-	}
-}
 
 //type commandRest struct{}
 //
@@ -1192,15 +1184,12 @@ type commandSyst struct{}
 func (cmd commandSyst) IsExtend() bool {
 	return false
 }
-
 func (cmd commandSyst) RequireParam() bool {
 	return false
 }
-
 func (cmd commandSyst) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandSyst) Execute(conn *Conn, param string) {
 	conn.writeMessage(215, "UNIX Type: L8")
 }
@@ -1220,15 +1209,12 @@ type commandType struct{}
 func (cmd commandType) IsExtend() bool {
 	return false
 }
-
 func (cmd commandType) RequireParam() bool {
 	return false
 }
-
 func (cmd commandType) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandType) Execute(conn *Conn, param string) {
 	if strings.ToUpper(param) == "A" {
 		conn.writeMessage(200, "Type set to ASCII")
@@ -1245,15 +1231,12 @@ type commandUser struct{}
 func (cmd commandUser) IsExtend() bool {
 	return false
 }
-
 func (cmd commandUser) RequireParam() bool {
 	return true
 }
-
 func (cmd commandUser) RequireAuth() bool {
 	return false
 }
-
 func (cmd commandUser) Execute(conn *Conn, param string) {
 	conn.reqUser = param
 	if conn.tls || conn.tlsConfig == nil {
