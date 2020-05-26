@@ -23,52 +23,71 @@ type commandMap map[string]Command
 
 var (
 	commands = commandMap{
-		"ADAT": commandAdat{},
-		"ALLO": commandAllo{},
-		"APPE": commandAppe{},
-		"AUTH": commandAuth{},
-		"CDUP": commandCdup{},
-		"CWD":  commandCwd{},
-		"CCC":  commandCcc{},
-		"CONF": commandConf{},
-		"DELE": commandDele{},
-		"ENC":  commandEnc{},
-		"EPRT": commandEprt{},
-		"EPSV": commandEpsv{},
-		"FEAT": commandFeat{},
-		"LPRT": commandLprt{},
-		"MDTM": commandMdtm{},
-		"MIC":  commandMic{},
-		"MKD":  commandMkd{},
-		"MODE": commandMode{},
-		"OPTS": commandOpts{},
-		"PBSZ": commandPbsz{},
-		"PROT": commandProt{},
-		"RETR": commandRetr{},
-		"REST": commandRest{},
-		"RNTO": commandRnto{},
-		"RMD":  commandRmd{},
-		"SIZE": commandSize{},
-		"STOR": commandStor{},
-		"STRU": commandStru{},
-		"SYST": commandSyst{},
-		"XCUP": commandCdup{},
-		"XCWD": commandCwd{},
-		"XMKD": commandMkd{},
-		"XPWD": commandPwd{},
-		"XRMD": commandRmd{},
+		//"ADAT": commandAdat{},
+		//"ALLO": commandAllo{},
+		//"APPE": commandAppe{},
+		//"AUTH": commandAuth{},
+		//"CDUP": commandCdup{},
+		//
+		//"CCC":  commandCcc{},
+		//"CONF": commandConf{},
+		//"DELE": commandDele{},
+		//"ENC":  commandEnc{},
+		//"EPRT": commandEprt{},
+		//"EPSV": commandEpsv{},
+		//
+		//"LPRT": commandLprt{},
+		//"MDTM": commandMdtm{},
+		//"MIC":  commandMic{},
+		//"MKD":  commandMkd{},
+		//"MODE": commandMode{},
+		//
+		//"PBSZ": commandPbsz{},
+		//"PROT": commandProt{},
 
-		"LIST": commandList{},
-		"NLST": commandNlst{},
-		"NOOP": commandNoop{},
-		"PASS": commandPass{},
-		"PASV": commandPasv{},
-		"PORT": commandPort{},
-		"PWD":  commandPwd{},
-		"QUIT": commandQuit{},
-		"RNFR": commandRnfr{},
-		"TYPE": commandType{},
+		//
+		//"RNTO": commandRnto{},
+
+		//"SIZE": commandSize{},
+		//"STOR": commandStor{},
+		//"STRU": commandStru{},
+		//
+		//"XCUP": commandCdup{},
+
+		//"XMKD": commandMkd{},
+
+		//"RMD":  commandRmd{},
+		//"XRMD": commandRmd{},
+		//
+		//"REST": commandRest{},
+		//
+
+		//
+		//"QUIT": commandQuit{},
+		//"RNFR": commandRnfr{},
+
 		"USER": commandUser{},
+		"PASS": commandPass{},
+
+		"OPTS": commandOpts{},
+		"PASV": commandPasv{},
+		"SYST": commandSyst{},
+		"FEAT": commandFeat{},
+
+		"TYPE": commandType{},
+		"PORT": commandPort{},
+		"NLST": commandNlst{},
+		"LIST": commandList{},
+		"RETR": commandRetr{},
+
+		"PWD": commandPwd{},
+		"CWD": commandCwd{},
+
+		//"NOOP": commandNoop{},
+
+		//命令转义
+		"XPWD": commandPwd{},
+		"XCWD": commandCwd{},
 	}
 )
 
@@ -76,52 +95,52 @@ var (
 //
 // This is essentially a ping from the client so we just respond with an
 // basic OK message.
-type commandAllo struct{}
-
-func (cmd commandAllo) IsExtend() bool {
-	return false
-}
-
-func (cmd commandAllo) RequireParam() bool {
-	return false
-}
-
-func (cmd commandAllo) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandAllo) Execute(conn *Conn, param string) {
-	conn.writeMessage(202, "Obsolete")
-}
+//type commandAllo struct{}
+//
+//func (cmd commandAllo) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandAllo) RequireParam() bool {
+//	return false
+//}
+//
+//func (cmd commandAllo) RequireAuth() bool {
+//	return false
+//}
+//
+//func (cmd commandAllo) Execute(conn *Conn, param string) {
+//	conn.writeMessage(202, "Obsolete")
+//}
 
 // commandAppe responds to the APPE FTP command. It allows the user to upload a
 // new file but always append if file exists otherwise create one.
-type commandAppe struct{}
-
-func (cmd commandAppe) IsExtend() bool {
-	return false
-}
-
-func (cmd commandAppe) RequireParam() bool {
-	return true
-}
-
-func (cmd commandAppe) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandAppe) Execute(conn *Conn, param string) {
-	targetPath := conn.buildPath(param)
-	conn.writeMessage(150, "Data transfer starting")
-
-	bytes, err := conn.driver.PutFile(targetPath, conn.dataConn, true)
-	if err == nil {
-		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"
-		conn.writeMessage(226, msg)
-	} else {
-		conn.writeMessage(450, fmt.Sprint("error during transfer: ", err))
-	}
-}
+//type commandAppe struct{}
+//
+//func (cmd commandAppe) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandAppe) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandAppe) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandAppe) Execute(conn *Conn, param string) {
+//	targetPath := conn.buildPath(param)
+//	conn.writeMessage(150, "Data transfer starting")
+//
+//	bytes, err := conn.driver.PutFile(targetPath, conn.dataConn, true)
+//	if err == nil {
+//		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"
+//		conn.writeMessage(226, msg)
+//	} else {
+//		conn.writeMessage(450, fmt.Sprint("error during transfer: ", err))
+//	}
+//}
 
 type commandOpts struct{}
 
@@ -189,24 +208,24 @@ func (cmd commandFeat) Execute(conn *Conn, param string) {
 // cmdCdup responds to the CDUP FTP command.
 //
 // Allows the client change their current directory to the parent.
-type commandCdup struct{}
-
-func (cmd commandCdup) IsExtend() bool {
-	return false
-}
-
-func (cmd commandCdup) RequireParam() bool {
-	return false
-}
-
-func (cmd commandCdup) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandCdup) Execute(conn *Conn, param string) {
-	otherCmd := &commandCwd{}
-	otherCmd.Execute(conn, "..")
-}
+//type commandCdup struct{}
+//
+//func (cmd commandCdup) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandCdup) RequireParam() bool {
+//	return false
+//}
+//
+//func (cmd commandCdup) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandCdup) Execute(conn *Conn, param string) {
+//	otherCmd := &commandCwd{}
+//	otherCmd.Execute(conn, "..")
+//}
 
 // commandCwd responds to the CWD FTP command. It allows the client to change the
 // current working directory.
@@ -237,29 +256,29 @@ func (cmd commandCwd) Execute(conn *Conn, param string) {
 
 // commandDele responds to the DELE FTP command. It allows the client to delete
 // a file
-type commandDele struct{}
-
-func (cmd commandDele) IsExtend() bool {
-	return false
-}
-
-func (cmd commandDele) RequireParam() bool {
-	return true
-}
-
-func (cmd commandDele) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandDele) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	err := conn.driver.DeleteFile(path)
-	if err == nil {
-		conn.writeMessage(250, "File deleted")
-	} else {
-		conn.writeMessage(550, fmt.Sprint("File delete failed: ", err))
-	}
-}
+//type commandDele struct{}
+//
+//func (cmd commandDele) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandDele) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandDele) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandDele) Execute(conn *Conn, param string) {
+//	path := conn.buildPath(param)
+//	err := conn.driver.DeleteFile(path)
+//	if err == nil {
+//		conn.writeMessage(250, "File deleted")
+//	} else {
+//		conn.writeMessage(550, fmt.Sprint("File delete failed: ", err))
+//	}
+//}
 
 // commandEprt responds to the EPRT FTP command. It allows the client to
 // request an active data socket with more options than the original PORT
@@ -876,227 +895,227 @@ func (cmd commandRmd) Execute(conn *Conn, param string) {
 	}
 }
 
-type commandAdat struct{}
+//type commandAdat struct{}
+//
+//func (cmd commandAdat) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandAdat) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandAdat) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandAdat) Execute(conn *Conn, param string) {
+//	conn.writeMessage(550, "Action not taken")
+//}
 
-func (cmd commandAdat) IsExtend() bool {
-	return false
-}
+//type commandAuth struct{}
+//
+//func (cmd commandAuth) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandAuth) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandAuth) RequireAuth() bool {
+//	return false
+//}
+//
+//func (cmd commandAuth) Execute(conn *Conn, param string) {
+//	if param == "TLS" && conn.tlsConfig != nil {
+//		conn.writeMessage(234, "AUTH command OK")
+//		err := conn.upgradeToTLS()
+//		if err != nil {
+//			conn.logger.Printf("Error upgrading connection to TLS %v", err.Error())
+//		}
+//	} else {
+//		conn.writeMessage(550, "Action not taken")
+//	}
+//}
 
-func (cmd commandAdat) RequireParam() bool {
-	return true
-}
+//type commandCcc struct{}
+//
+//func (cmd commandCcc) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandCcc) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandCcc) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandCcc) Execute(conn *Conn, param string) {
+//	conn.writeMessage(550, "Action not taken")
+//}
 
-func (cmd commandAdat) RequireAuth() bool {
-	return true
-}
+//type commandEnc struct{}
+//
+//func (cmd commandEnc) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandEnc) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandEnc) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandEnc) Execute(conn *Conn, param string) {
+//	conn.writeMessage(550, "Action not taken")
+//}
 
-func (cmd commandAdat) Execute(conn *Conn, param string) {
-	conn.writeMessage(550, "Action not taken")
-}
+//type commandMic struct{}
+//
+//func (cmd commandMic) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandMic) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandMic) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandMic) Execute(conn *Conn, param string) {
+//	conn.writeMessage(550, "Action not taken")
+//}
 
-type commandAuth struct{}
+//type commandPbsz struct{}
+//
+//func (cmd commandPbsz) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandPbsz) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandPbsz) RequireAuth() bool {
+//	return false
+//}
+//
+//func (cmd commandPbsz) Execute(conn *Conn, param string) {
+//	if conn.tls && param == "0" {
+//		conn.writeMessage(200, "OK")
+//	} else {
+//		conn.writeMessage(550, "Action not taken")
+//	}
+//}
 
-func (cmd commandAuth) IsExtend() bool {
-	return false
-}
+//type commandProt struct{}
+//
+//func (cmd commandProt) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandProt) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandProt) RequireAuth() bool {
+//	return false
+//}
+//
+//func (cmd commandProt) Execute(conn *Conn, param string) {
+//	if conn.tls && param == "P" {
+//		conn.writeMessage(200, "OK")
+//	} else if conn.tls {
+//		conn.writeMessage(536, "Only P level is supported")
+//	} else {
+//		conn.writeMessage(550, "Action not taken")
+//	}
+//}
 
-func (cmd commandAuth) RequireParam() bool {
-	return true
-}
-
-func (cmd commandAuth) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandAuth) Execute(conn *Conn, param string) {
-	if param == "TLS" && conn.tlsConfig != nil {
-		conn.writeMessage(234, "AUTH command OK")
-		err := conn.upgradeToTLS()
-		if err != nil {
-			conn.logger.Printf("Error upgrading connection to TLS %v", err.Error())
-		}
-	} else {
-		conn.writeMessage(550, "Action not taken")
-	}
-}
-
-type commandCcc struct{}
-
-func (cmd commandCcc) IsExtend() bool {
-	return false
-}
-
-func (cmd commandCcc) RequireParam() bool {
-	return true
-}
-
-func (cmd commandCcc) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandCcc) Execute(conn *Conn, param string) {
-	conn.writeMessage(550, "Action not taken")
-}
-
-type commandEnc struct{}
-
-func (cmd commandEnc) IsExtend() bool {
-	return false
-}
-
-func (cmd commandEnc) RequireParam() bool {
-	return true
-}
-
-func (cmd commandEnc) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandEnc) Execute(conn *Conn, param string) {
-	conn.writeMessage(550, "Action not taken")
-}
-
-type commandMic struct{}
-
-func (cmd commandMic) IsExtend() bool {
-	return false
-}
-
-func (cmd commandMic) RequireParam() bool {
-	return true
-}
-
-func (cmd commandMic) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandMic) Execute(conn *Conn, param string) {
-	conn.writeMessage(550, "Action not taken")
-}
-
-type commandPbsz struct{}
-
-func (cmd commandPbsz) IsExtend() bool {
-	return false
-}
-
-func (cmd commandPbsz) RequireParam() bool {
-	return true
-}
-
-func (cmd commandPbsz) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandPbsz) Execute(conn *Conn, param string) {
-	if conn.tls && param == "0" {
-		conn.writeMessage(200, "OK")
-	} else {
-		conn.writeMessage(550, "Action not taken")
-	}
-}
-
-type commandProt struct{}
-
-func (cmd commandProt) IsExtend() bool {
-	return false
-}
-
-func (cmd commandProt) RequireParam() bool {
-	return true
-}
-
-func (cmd commandProt) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandProt) Execute(conn *Conn, param string) {
-	if conn.tls && param == "P" {
-		conn.writeMessage(200, "OK")
-	} else if conn.tls {
-		conn.writeMessage(536, "Only P level is supported")
-	} else {
-		conn.writeMessage(550, "Action not taken")
-	}
-}
-
-type commandConf struct{}
-
-func (cmd commandConf) IsExtend() bool {
-	return false
-}
-
-func (cmd commandConf) RequireParam() bool {
-	return true
-}
-
-func (cmd commandConf) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandConf) Execute(conn *Conn, param string) {
-	conn.writeMessage(550, "Action not taken")
-}
+//type commandConf struct{}
+//
+//func (cmd commandConf) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandConf) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandConf) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandConf) Execute(conn *Conn, param string) {
+//	conn.writeMessage(550, "Action not taken")
+//}
 
 // commandSize responds to the SIZE FTP command. It returns the size of the
 // requested path in bytes.
-type commandSize struct{}
-
-func (cmd commandSize) IsExtend() bool {
-	return false
-}
-
-func (cmd commandSize) RequireParam() bool {
-	return true
-}
-
-func (cmd commandSize) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandSize) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	stat, err := conn.driver.Stat(path)
-	if err != nil {
-		log.Printf("Size: error(%s)", err)
-		conn.writeMessage(450, fmt.Sprint("path", path, "not found"))
-	} else {
-		conn.writeMessage(213, strconv.Itoa(int(stat.Size())))
-	}
-}
+//type commandSize struct{}
+//
+//func (cmd commandSize) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandSize) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandSize) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandSize) Execute(conn *Conn, param string) {
+//	path := conn.buildPath(param)
+//	stat, err := conn.driver.Stat(path)
+//	if err != nil {
+//		log.Printf("Size: error(%s)", err)
+//		conn.writeMessage(450, fmt.Sprint("path", path, "not found"))
+//	} else {
+//		conn.writeMessage(213, strconv.Itoa(int(stat.Size())))
+//	}
+//}
 
 // commandStor responds to the STOR FTP command. It allows the user to upload a
 // new file.
-type commandStor struct{}
-
-func (cmd commandStor) IsExtend() bool {
-	return false
-}
-
-func (cmd commandStor) RequireParam() bool {
-	return true
-}
-
-func (cmd commandStor) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandStor) Execute(conn *Conn, param string) {
-	targetPath := conn.buildPath(param)
-	conn.writeMessage(150, "Data transfer starting")
-
-	defer func() {
-		conn.appendData = false
-	}()
-
-	bytes, err := conn.driver.PutFile(targetPath, conn.dataConn, conn.appendData)
-	if err == nil {
-		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"
-		conn.writeMessage(226, msg)
-	} else {
-		conn.writeMessage(450, fmt.Sprint("error during transfer: ", err))
-	}
-}
+//type commandStor struct{}
+//
+//func (cmd commandStor) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandStor) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandStor) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandStor) Execute(conn *Conn, param string) {
+//	targetPath := conn.buildPath(param)
+//	conn.writeMessage(150, "Data transfer starting")
+//
+//	defer func() {
+//		conn.appendData = false
+//	}()
+//
+//	bytes, err := conn.driver.PutFile(targetPath, conn.dataConn, conn.appendData)
+//	if err == nil {
+//		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"
+//		conn.writeMessage(226, msg)
+//	} else {
+//		conn.writeMessage(450, fmt.Sprint("error during transfer: ", err))
+//	}
+//}
 
 // commandStru responds to the STRU FTP command.
 //
@@ -1107,29 +1126,29 @@ func (cmd commandStor) Execute(conn *Conn, param string) {
 //
 // These days files are sent unmodified, and F(ile) mode is the only one we
 // really need to support.
-type commandStru struct{}
+//type commandStru struct{}
+//
+//func (cmd commandStru) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandStru) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandStru) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandStru) Execute(conn *Conn, param string) {
+//	if strings.ToUpper(param) == "F" {
+//		conn.writeMessage(200, "OK")
+//	} else {
+//		conn.writeMessage(504, "STRU is an obsolete command")
+//	}
+//}
 
-func (cmd commandStru) IsExtend() bool {
-	return false
-}
-
-func (cmd commandStru) RequireParam() bool {
-	return true
-}
-
-func (cmd commandStru) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandStru) Execute(conn *Conn, param string) {
-	if strings.ToUpper(param) == "F" {
-		conn.writeMessage(200, "OK")
-	} else {
-		conn.writeMessage(504, "STRU is an obsolete command")
-	}
-}
-
-// commandSyst responds to the SYST FTP command by providing a canned response.
+//commandSyst responds to the SYST FTP command by providing a canned response.
 type commandSyst struct{}
 
 func (cmd commandSyst) IsExtend() bool {
