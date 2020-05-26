@@ -1,7 +1,3 @@
-// Copyright 2018 The goftp Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
-// license that can be found in the LICENSE file.
-
 package server
 
 import (
@@ -13,8 +9,7 @@ import (
 
 type listFormatter []FileInfo
 
-// Short returns a string that lists the collection of files by name only,
-// one per line
+// Short returns a string that lists the collection of files by name only, one per line
 func (formatter listFormatter) Short() []byte {
 	var buf bytes.Buffer
 	for _, file := range formatter {
@@ -23,8 +18,7 @@ func (formatter listFormatter) Short() []byte {
 	return buf.Bytes()
 }
 
-// Detailed returns a string that lists the collection of files with extra
-// detail, one per line
+// Detailed returns a string that lists the collection of files with extra detail, one per line
 func (formatter listFormatter) Detailed() []byte {
 	var buf bytes.Buffer
 	for _, file := range formatter {

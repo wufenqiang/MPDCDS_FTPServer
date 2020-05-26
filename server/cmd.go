@@ -1,13 +1,7 @@
-// Copyright 2018 The goftp Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
-// license that can be found in the LICENSE file.
-
 package server
 
 import (
-	"encoding/binary"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -63,26 +57,37 @@ var (
 		//
 
 		//
-		//"QUIT": commandQuit{},
+
 		//"RNFR": commandRnfr{},
 
-		"USER": commandUser{},
-		"PASS": commandPass{},
-
-		"OPTS": commandOpts{},
-		"PASV": commandPasv{},
-		"SYST": commandSyst{},
-		"FEAT": commandFeat{},
-
-		"TYPE": commandType{},
-		"PORT": commandPort{},
+		/**张志海
+		 */
 		"NLST": commandNlst{},
 		"LIST": commandList{},
+		"MLSD": commandMlsd{},
+
+		/**吴奋强
+		 */
 		"RETR": commandRetr{},
+		"PASS": commandPass{},
+		"FEAT": commandFeat{},
+		"CLNT": commandClnt{},
 
-		"PWD": commandPwd{},
-		"CWD": commandCwd{},
+		/**黄欣
+		 */
+		"PWD":  commandPwd{},
+		"CWD":  commandCwd{},
+		"HELP": commandHelp{},
 
+		/**不做修改
+		 */
+		"PASV": commandPasv{},
+		"USER": commandUser{},
+		"SYST": commandSyst{},
+		"OPTS": commandOpts{},
+		"TYPE": commandType{},
+		"PORT": commandPort{},
+		"QUIT": commandQuit{},
 		//"NOOP": commandNoop{},
 
 		//命令转义
@@ -147,15 +152,12 @@ type commandOpts struct{}
 func (cmd commandOpts) IsExtend() bool {
 	return false
 }
-
 func (cmd commandOpts) RequireParam() bool {
 	return false
 }
-
 func (cmd commandOpts) RequireAuth() bool {
 	return false
 }
-
 func (cmd commandOpts) Execute(conn *Conn, param string) {
 	parts := strings.Fields(param)
 	if len(parts) != 2 {
@@ -179,11 +181,9 @@ type commandFeat struct{}
 func (cmd commandFeat) IsExtend() bool {
 	return false
 }
-
 func (cmd commandFeat) RequireParam() bool {
 	return false
 }
-
 func (cmd commandFeat) RequireAuth() bool {
 	return false
 }
@@ -200,9 +200,36 @@ func init() {
 		}
 	}
 }
-
 func (cmd commandFeat) Execute(conn *Conn, param string) {
 	conn.writeMessageMultiline(211, conn.server.feats)
+}
+
+type commandClnt struct{}
+
+func (cmd commandClnt) IsExtend() bool {
+	return false
+}
+func (cmd commandClnt) RequireParam() bool {
+	return false
+}
+func (cmd commandClnt) RequireAuth() bool {
+	return false
+}
+func (cmd commandClnt) Execute(conn *Conn, param string) {
+}
+
+type commandMlsd struct{}
+
+func (cmd commandMlsd) IsExtend() bool {
+	return false
+}
+func (cmd commandMlsd) RequireParam() bool {
+	return false
+}
+func (cmd commandMlsd) RequireAuth() bool {
+	return false
+}
+func (cmd commandMlsd) Execute(conn *Conn, param string) {
 }
 
 // cmdCdup responds to the CDUP FTP command.
@@ -254,6 +281,21 @@ func (cmd commandCwd) Execute(conn *Conn, param string) {
 	}
 }
 
+type commandHelp struct{}
+
+func (cmd commandHelp) IsExtend() bool {
+	return false
+}
+func (cmd commandHelp) RequireParam() bool {
+	return true
+}
+func (cmd commandHelp) RequireAuth() bool {
+	return true
+}
+func (cmd commandHelp) Execute(conn *Conn, param string) {
+
+}
+
 // commandDele responds to the DELE FTP command. It allows the client to delete
 // a file
 //type commandDele struct{}
@@ -283,131 +325,131 @@ func (cmd commandCwd) Execute(conn *Conn, param string) {
 // commandEprt responds to the EPRT FTP command. It allows the client to
 // request an active data socket with more options than the original PORT
 // command. It mainly adds ipv6 support.
-type commandEprt struct{}
-
-func (cmd commandEprt) IsExtend() bool {
-	return true
-}
-
-func (cmd commandEprt) RequireParam() bool {
-	return true
-}
-
-func (cmd commandEprt) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandEprt) Execute(conn *Conn, param string) {
-	delim := string(param[0:1])
-	parts := strings.Split(param, delim)
-	addressFamily, err := strconv.Atoi(parts[1])
-	host := parts[2]
-	port, err := strconv.Atoi(parts[3])
-	if addressFamily != 1 && addressFamily != 2 {
-		conn.writeMessage(522, "Network protocol not supported, use (1,2)")
-		return
-	}
-	socket, err := newActiveSocket(host, port, conn.logger, conn.sessionID)
-	if err != nil {
-		conn.writeMessage(425, "Data connection failed")
-		return
-	}
-	conn.dataConn = socket
-	conn.writeMessage(200, "Connection established ("+strconv.Itoa(port)+")")
-}
+//type commandEprt struct{}
+//
+//func (cmd commandEprt) IsExtend() bool {
+//	return true
+//}
+//
+//func (cmd commandEprt) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandEprt) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandEprt) Execute(conn *Conn, param string) {
+//	delim := string(param[0:1])
+//	parts := strings.Split(param, delim)
+//	addressFamily, err := strconv.Atoi(parts[1])
+//	host := parts[2]
+//	port, err := strconv.Atoi(parts[3])
+//	if addressFamily != 1 && addressFamily != 2 {
+//		conn.writeMessage(522, "Network protocol not supported, use (1,2)")
+//		return
+//	}
+//	socket, err := newActiveSocket(host, port, conn.logger, conn.sessionID)
+//	if err != nil {
+//		conn.writeMessage(425, "Data connection failed")
+//		return
+//	}
+//	conn.dataConn = socket
+//	conn.writeMessage(200, "Connection established ("+strconv.Itoa(port)+")")
+//}
 
 // commandLprt responds to the LPRT FTP command. It allows the client to
 // request an active data socket with more options than the original PORT
 // command.  FTP Operation Over Big Address Records.
-type commandLprt struct{}
-
-func (cmd commandLprt) IsExtend() bool {
-	return true
-}
-
-func (cmd commandLprt) RequireParam() bool {
-	return true
-}
-
-func (cmd commandLprt) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandLprt) Execute(conn *Conn, param string) {
-	// No tests for this code yet
-
-	parts := strings.Split(param, ",")
-
-	addressFamily, err := strconv.Atoi(parts[0])
-	if addressFamily != 4 {
-		conn.writeMessage(522, "Network protocol not supported, use 4")
-		return
-	}
-
-	addressLength, err := strconv.Atoi(parts[1])
-	if addressLength != 4 {
-		conn.writeMessage(522, "Network IP length not supported, use 4")
-		return
-	}
-
-	host := strings.Join(parts[2:2+addressLength], ".")
-
-	portLength, err := strconv.Atoi(parts[2+addressLength])
-	portAddress := parts[3+addressLength : 3+addressLength+portLength]
-
-	// Convert string[] to byte[]
-	portBytes := make([]byte, portLength)
-	for i := range portAddress {
-		p, _ := strconv.Atoi(portAddress[i])
-		portBytes[i] = byte(p)
-	}
-
-	// convert the bytes to an int
-	port := int(binary.BigEndian.Uint16(portBytes))
-
-	// if the existing connection is on the same host/port don't reconnect
-	if conn.dataConn.Host() == host && conn.dataConn.Port() == port {
-		return
-	}
-
-	socket, err := newActiveSocket(host, port, conn.logger, conn.sessionID)
-	if err != nil {
-		conn.writeMessage(425, "Data connection failed")
-		return
-	}
-	conn.dataConn = socket
-	conn.writeMessage(200, "Connection established ("+strconv.Itoa(port)+")")
-}
+//type commandLprt struct{}
+//
+//func (cmd commandLprt) IsExtend() bool {
+//	return true
+//}
+//
+//func (cmd commandLprt) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandLprt) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandLprt) Execute(conn *Conn, param string) {
+//	// No tests for this code yet
+//
+//	parts := strings.Split(param, ",")
+//
+//	addressFamily, err := strconv.Atoi(parts[0])
+//	if addressFamily != 4 {
+//		conn.writeMessage(522, "Network protocol not supported, use 4")
+//		return
+//	}
+//
+//	addressLength, err := strconv.Atoi(parts[1])
+//	if addressLength != 4 {
+//		conn.writeMessage(522, "Network IP length not supported, use 4")
+//		return
+//	}
+//
+//	host := strings.Join(parts[2:2+addressLength], ".")
+//
+//	portLength, err := strconv.Atoi(parts[2+addressLength])
+//	portAddress := parts[3+addressLength : 3+addressLength+portLength]
+//
+//	// Convert string[] to byte[]
+//	portBytes := make([]byte, portLength)
+//	for i := range portAddress {
+//		p, _ := strconv.Atoi(portAddress[i])
+//		portBytes[i] = byte(p)
+//	}
+//
+//	// convert the bytes to an int
+//	port := int(binary.BigEndian.Uint16(portBytes))
+//
+//	// if the existing connection is on the same host/port don't reconnect
+//	if conn.dataConn.Host() == host && conn.dataConn.Port() == port {
+//		return
+//	}
+//
+//	socket, err := newActiveSocket(host, port, conn.logger, conn.sessionID)
+//	if err != nil {
+//		conn.writeMessage(425, "Data connection failed")
+//		return
+//	}
+//	conn.dataConn = socket
+//	conn.writeMessage(200, "Connection established ("+strconv.Itoa(port)+")")
+//}
 
 // commandEpsv responds to the EPSV FTP command. It allows the client to
 // request a passive data socket with more options than the original PASV
 // command. It mainly adds ipv6 support, although we don't support that yet.
-type commandEpsv struct{}
-
-func (cmd commandEpsv) IsExtend() bool {
-	return true
-}
-
-func (cmd commandEpsv) RequireParam() bool {
-	return false
-}
-
-func (cmd commandEpsv) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandEpsv) Execute(conn *Conn, param string) {
-	addr := conn.passiveListenIP()
-	socket, err := newPassiveSocket(addr, conn.PassivePort, conn.logger, conn.sessionID, conn.tlsConfig)
-	if err != nil {
-		log.Println(err)
-		conn.writeMessage(425, "Data connection failed")
-		return
-	}
-	conn.dataConn = socket
-	msg := fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", socket.Port())
-	conn.writeMessage(229, msg)
-}
+//type commandEpsv struct{}
+//
+//func (cmd commandEpsv) IsExtend() bool {
+//	return true
+//}
+//
+//func (cmd commandEpsv) RequireParam() bool {
+//	return false
+//}
+//
+//func (cmd commandEpsv) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandEpsv) Execute(conn *Conn, param string) {
+//	addr := conn.passiveListenIP()
+//	socket, err := newPassiveSocket(addr, conn.PassivePort, conn.logger, conn.sessionID, conn.tlsConfig)
+//	if err != nil {
+//		log.Println(err)
+//		conn.writeMessage(425, "Data connection failed")
+//		return
+//	}
+//	conn.dataConn = socket
+//	msg := fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", socket.Port())
+//	conn.writeMessage(229, msg)
+//}
 
 // commandList responds to the LIST FTP command. It allows the client to retreive
 // a detailed listing of the contents of a directory.
@@ -416,15 +458,12 @@ type commandList struct{}
 func (cmd commandList) IsExtend() bool {
 	return false
 }
-
 func (cmd commandList) RequireParam() bool {
 	return false
 }
-
 func (cmd commandList) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandList) Execute(conn *Conn, param string) {
 	path := conn.buildPath(parseListParam(param))
 	info, err := conn.driver.Stat(path)
@@ -454,7 +493,6 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
 	conn.sendOutofbandData(listFormatter(files).Detailed())
 }
-
 func parseListParam(param string) (path string) {
 	if len(param) == 0 {
 		path = param
@@ -515,55 +553,55 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 
 // commandMdtm responds to the MDTM FTP command. It allows the client to
 // retreive the last modified time of a file.
-type commandMdtm struct{}
-
-func (cmd commandMdtm) IsExtend() bool {
-	return false
-}
-
-func (cmd commandMdtm) RequireParam() bool {
-	return true
-}
-
-func (cmd commandMdtm) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandMdtm) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	stat, err := conn.driver.Stat(path)
-	if err == nil {
-		conn.writeMessage(213, stat.ModTime().Format("20060102150405"))
-	} else {
-		conn.writeMessage(450, "File not available")
-	}
-}
+//type commandMdtm struct{}
+//
+//func (cmd commandMdtm) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandMdtm) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandMdtm) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandMdtm) Execute(conn *Conn, param string) {
+//	path := conn.buildPath(param)
+//	stat, err := conn.driver.Stat(path)
+//	if err == nil {
+//		conn.writeMessage(213, stat.ModTime().Format("20060102150405"))
+//	} else {
+//		conn.writeMessage(450, "File not available")
+//	}
+//}
 
 // commandMkd responds to the MKD FTP command. It allows the client to create
 // a new directory
-type commandMkd struct{}
-
-func (cmd commandMkd) IsExtend() bool {
-	return false
-}
-
-func (cmd commandMkd) RequireParam() bool {
-	return true
-}
-
-func (cmd commandMkd) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandMkd) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	err := conn.driver.MakeDir(path)
-	if err == nil {
-		conn.writeMessage(257, "Directory created")
-	} else {
-		conn.writeMessage(550, fmt.Sprint("Action not taken: ", err))
-	}
-}
+//type commandMkd struct{}
+//
+//func (cmd commandMkd) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandMkd) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandMkd) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandMkd) Execute(conn *Conn, param string) {
+//	path := conn.buildPath(param)
+//	err := conn.driver.MakeDir(path)
+//	if err == nil {
+//		conn.writeMessage(257, "Directory created")
+//	} else {
+//		conn.writeMessage(550, fmt.Sprint("Action not taken: ", err))
+//	}
+//}
 
 // cmdMode responds to the MODE FTP command.
 //
@@ -571,49 +609,49 @@ func (cmd commandMkd) Execute(conn *Conn, param string) {
 // would be sent over the data socket, In reality these days (S)tream mode
 // is all that is used for the mode - data is just streamed down the data
 // socket unchanged.
-type commandMode struct{}
-
-func (cmd commandMode) IsExtend() bool {
-	return false
-}
-
-func (cmd commandMode) RequireParam() bool {
-	return true
-}
-
-func (cmd commandMode) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandMode) Execute(conn *Conn, param string) {
-	if strings.ToUpper(param) == "S" {
-		conn.writeMessage(200, "OK")
-	} else {
-		conn.writeMessage(504, "MODE is an obsolete command")
-	}
-}
+//type commandMode struct{}
+//
+//func (cmd commandMode) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandMode) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandMode) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandMode) Execute(conn *Conn, param string) {
+//	if strings.ToUpper(param) == "S" {
+//		conn.writeMessage(200, "OK")
+//	} else {
+//		conn.writeMessage(504, "MODE is an obsolete command")
+//	}
+//}
 
 // cmdNoop responds to the NOOP FTP command.
 //
 // This is essentially a ping from the client so we just respond with an
 // basic 200 message.
-type commandNoop struct{}
-
-func (cmd commandNoop) IsExtend() bool {
-	return false
-}
-
-func (cmd commandNoop) RequireParam() bool {
-	return false
-}
-
-func (cmd commandNoop) RequireAuth() bool {
-	return false
-}
-
-func (cmd commandNoop) Execute(conn *Conn, param string) {
-	conn.writeMessage(200, "OK")
-}
+//type commandNoop struct{}
+//
+//func (cmd commandNoop) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandNoop) RequireParam() bool {
+//	return false
+//}
+//
+//func (cmd commandNoop) RequireAuth() bool {
+//	return false
+//}
+//
+//func (cmd commandNoop) Execute(conn *Conn, param string) {
+//	conn.writeMessage(200, "OK")
+//}
 
 // commandPass respond to the PASS FTP command by asking the driver if the
 // supplied username and password are valid
@@ -735,8 +773,8 @@ func (cmd commandPwd) Execute(conn *Conn, param string) {
 	conn.writeMessage(257, "\""+conn.namePrefix+"\" is the current directory")
 }
 
-// CommandQuit responds to the QUIT FTP command. The client has requested the
-// connection be closed.
+//CommandQuit responds to the QUIT FTP command. The client has requested the
+//connection be closed.
 type commandQuit struct{}
 
 func (cmd commandQuit) IsExtend() bool {
@@ -791,109 +829,109 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	}
 }
 
-type commandRest struct{}
-
-func (cmd commandRest) IsExtend() bool {
-	return false
-}
-
-func (cmd commandRest) RequireParam() bool {
-	return true
-}
-
-func (cmd commandRest) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandRest) Execute(conn *Conn, param string) {
-	var err error
-	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)
-	if err != nil {
-		conn.writeMessage(551, "File not available")
-		return
-	}
-
-	conn.appendData = true
-
-	conn.writeMessage(350, fmt.Sprint("Start transfer from ", conn.lastFilePos))
-}
+//type commandRest struct{}
+//
+//func (cmd commandRest) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandRest) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandRest) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandRest) Execute(conn *Conn, param string) {
+//	var err error
+//	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)
+//	if err != nil {
+//		conn.writeMessage(551, "File not available")
+//		return
+//	}
+//
+//	conn.appendData = true
+//
+//	conn.writeMessage(350, fmt.Sprint("Start transfer from ", conn.lastFilePos))
+//}
 
 // commandRnfr responds to the RNFR FTP command. It's the first of two commands
 // required for a client to rename a file.
-type commandRnfr struct{}
-
-func (cmd commandRnfr) IsExtend() bool {
-	return false
-}
-
-func (cmd commandRnfr) RequireParam() bool {
-	return true
-}
-
-func (cmd commandRnfr) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandRnfr) Execute(conn *Conn, param string) {
-	conn.renameFrom = conn.buildPath(param)
-	conn.writeMessage(350, "Requested file action pending further information.")
-}
+//type commandRnfr struct{}
+//
+//func (cmd commandRnfr) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandRnfr) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandRnfr) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandRnfr) Execute(conn *Conn, param string) {
+//	conn.renameFrom = conn.buildPath(param)
+//	conn.writeMessage(350, "Requested file action pending further information.")
+//}
 
 // cmdRnto responds to the RNTO FTP command. It's the second of two commands
 // required for a client to rename a file.
-type commandRnto struct{}
-
-func (cmd commandRnto) IsExtend() bool {
-	return false
-}
-
-func (cmd commandRnto) RequireParam() bool {
-	return true
-}
-
-func (cmd commandRnto) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandRnto) Execute(conn *Conn, param string) {
-	toPath := conn.buildPath(param)
-	err := conn.driver.Rename(conn.renameFrom, toPath)
-	defer func() {
-		conn.renameFrom = ""
-	}()
-
-	if err == nil {
-		conn.writeMessage(250, "File renamed")
-	} else {
-		conn.writeMessage(550, fmt.Sprint("Action not taken: ", err))
-	}
-}
+//type commandRnto struct{}
+//
+//func (cmd commandRnto) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandRnto) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandRnto) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandRnto) Execute(conn *Conn, param string) {
+//	toPath := conn.buildPath(param)
+//	err := conn.driver.Rename(conn.renameFrom, toPath)
+//	defer func() {
+//		conn.renameFrom = ""
+//	}()
+//
+//	if err == nil {
+//		conn.writeMessage(250, "File renamed")
+//	} else {
+//		conn.writeMessage(550, fmt.Sprint("Action not taken: ", err))
+//	}
+//}
 
 // cmdRmd responds to the RMD FTP command. It allows the client to delete a
 // directory.
-type commandRmd struct{}
-
-func (cmd commandRmd) IsExtend() bool {
-	return false
-}
-
-func (cmd commandRmd) RequireParam() bool {
-	return true
-}
-
-func (cmd commandRmd) RequireAuth() bool {
-	return true
-}
-
-func (cmd commandRmd) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
-	err := conn.driver.DeleteDir(path)
-	if err == nil {
-		conn.writeMessage(250, "Directory deleted")
-	} else {
-		conn.writeMessage(550, fmt.Sprint("Directory delete failed: ", err))
-	}
-}
+//type commandRmd struct{}
+//
+//func (cmd commandRmd) IsExtend() bool {
+//	return false
+//}
+//
+//func (cmd commandRmd) RequireParam() bool {
+//	return true
+//}
+//
+//func (cmd commandRmd) RequireAuth() bool {
+//	return true
+//}
+//
+//func (cmd commandRmd) Execute(conn *Conn, param string) {
+//	path := conn.buildPath(param)
+//	err := conn.driver.DeleteDir(path)
+//	if err == nil {
+//		conn.writeMessage(250, "Directory deleted")
+//	} else {
+//		conn.writeMessage(550, fmt.Sprint("Directory delete failed: ", err))
+//	}
+//}
 
 //type commandAdat struct{}
 //

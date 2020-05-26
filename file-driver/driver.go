@@ -3,12 +3,11 @@ package filedriver
 import (
 	"errors"
 	"fmt"
+	"goftpserver/server"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"goftpserver/server"
 )
 
 type FileDriver struct {
