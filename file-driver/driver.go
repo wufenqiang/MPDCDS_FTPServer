@@ -1,6 +1,7 @@
 package filedriver
 
 import (
+	"container/list"
 	"errors"
 	"fmt"
 	"goftpserver/server"
@@ -46,14 +47,53 @@ func (driver *FileDriver) Init(conn *server.Conn) {
 
 func (driver *FileDriver) ChangeDir(path string) error {
 	rPath := driver.realPath(path)
-	f, err := os.Lstat(rPath)
-	if err != nil {
-		return err
+	ext := filepath.Ext(rPath)
+	if ext != "" {
+		return errors.New("Not a directory")
 	}
-	if f.IsDir() {
+	//判断改路径是否存在，调用API服务接
+	dirList := list.New()
+	dirList.PushBack("/tmp/test/mm")
+	dirList.PushBack("/tmp/test/a/b/c")
+	flag := false
+	for p := dirList.Front(); p != nil; p = p.Next() {
+		dir := p.Value
+		dirStr := dir.(string)
+		dirs := strings.Split(dirStr, "/")
+		newDir := ""
+		for i := 0; i < len(dirs); i++ {
+			newDir += dirs[i] + "\\"
+			//newRealPath :=filepath.FromSlash(newDir)
+			newRealPath := ""
+			if i > 0 {
+				newRealPath = newDir[0 : len(newDir)-1]
+			} else {
+				newRealPath = newDir
+			}
+			//flag=strings.Contains(newRealPath, rPath)
+			if strings.EqualFold(newRealPath, rPath) {
+				flag = true
+				break
+			}
+		}
+		if flag {
+			break
+		}
+	}
+	if flag {
 		return nil
 	}
-	return errors.New("Not a directory")
+	message := "failed: CreateFile " + rPath + ": The system cannot find the file specified."
+	return errors.New(message)
+	//rPath := driver.realPath(path)
+	//f, err := os.Lstat(rPath)
+	//if err != nil {
+	//	return err
+	//}
+	//if f.IsDir() {
+	//	return nil
+	//}
+	//return errors.New("Not a directory")
 }
 
 func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
