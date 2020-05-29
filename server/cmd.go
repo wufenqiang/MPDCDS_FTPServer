@@ -537,7 +537,6 @@ func (cmd commandHelp) Execute(conn *Conn, param string) {
 
 		default:
 			conn.writeMessage(214, "Invalid command!")
-			return
 		}
 	}
 
