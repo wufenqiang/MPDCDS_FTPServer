@@ -15,6 +15,29 @@ type Command interface {
 
 type commandMap map[string]Command
 
+const (
+	NLST = "NLST"
+	LIST = "LIST"
+	MLSD = "MLSD"
+	RETR = "RETR"
+	PASS = "PASS"
+	FEAT = "FEAT"
+	//CLNT = "CLNT"
+	PWD  = "PWD"
+	CWD  = "CWD"
+	HELP = "HELP"
+	PASV = "PASV"
+	USER = "USER"
+	SYST = "SYST"
+	OPTS = "OPTS"
+	TYPE = "TYPE"
+	PORT = "PORT"
+	QUIT = "QUIT"
+	NOOP = "NOOP"
+	XPWD = "XPWD"
+	XCWD = "XCWD"
+)
+
 var (
 	commands = commandMap{
 		//"ADAT": commandAdat{},
@@ -62,37 +85,37 @@ var (
 
 		/**张志海
 		 */
-		"NLST": commandNlst{},
-		"LIST": commandList{},
-		"MLSD": commandMlsd{},
+		NLST: commandNlst{},
+		LIST: commandList{},
+		MLSD: commandMlsd{},
 
 		/**吴奋强
 		 */
-		"RETR": commandRetr{},
-		"PASS": commandPass{},
-		"FEAT": commandFeat{},
+		RETR: commandRetr{},
+		PASS: commandPass{},
+		FEAT: commandFeat{},
 		//"CLNT": {},
 
 		/**黄欣
 		 */
-		"PWD":  commandPwd{},
-		"CWD":  commandCwd{},
-		"HELP": commandHelp{},
+		PWD:  commandPwd{},
+		CWD:  commandCwd{},
+		HELP: commandHelp{},
 
 		/**不做修改
 		 */
-		"PASV": commandPasv{},
-		"USER": commandUser{},
-		"SYST": commandSyst{},
-		"OPTS": commandOpts{},
-		"TYPE": commandType{},
-		"PORT": commandPort{},
-		"QUIT": commandQuit{},
-		"NOOP": commandNoop{},
+		PASV: commandPasv{},
+		USER: commandUser{},
+		SYST: commandSyst{},
+		OPTS: commandOpts{},
+		TYPE: commandType{},
+		PORT: commandPort{},
+		QUIT: commandQuit{},
+		NOOP: commandNoop{},
 
 		//命令转义
-		"XPWD": commandPwd{},
-		"XCWD": commandCwd{},
+		XPWD: commandPwd{},
+		XCWD: commandCwd{},
 	}
 )
 
@@ -434,28 +457,6 @@ func (cmd commandHelp) RequireAuth() bool {
 	return true
 }
 
-const (
-	NLST = "NLST"
-	LIST = "LIST"
-	MLSD = "MLSD"
-	RETR = "RETR"
-	PASS = "PASS"
-	FEAT = "FEAT"
-	//CLNT = "CLNT"
-	PWD  = "PWD"
-	CWD  = "CWD"
-	HELP = "HELP"
-	PASV = "PASV"
-	USER = "USER"
-	SYST = "SYST"
-	OPTS = "OPTS"
-	TYPE = "TYPE"
-	PORT = "PORT"
-	QUIT = "QUIT"
-	XPWD = "XPWD"
-	XCWD = "XCWD"
-)
-
 func (cmd commandHelp) Execute(conn *Conn, param string) {
 	if param == "" {
 		mesaage := "The following commands are recognized (* ==>'s unimplemented)." + "\n"
@@ -535,8 +536,13 @@ func (cmd commandHelp) Execute(conn *Conn, param string) {
 
 			conn.writeMessage(214, "Syntax: "+param+" - (terminate service)")
 
+		case NOOP:
+
+			conn.writeMessage(214, "Syntax: "+param+" - (Server Replies No operation.)")
+
 		default:
-			conn.writeMessage(214, "Invalid command!")
+
+			conn.writeMessage(500, "Invalid command!")
 		}
 	}
 
