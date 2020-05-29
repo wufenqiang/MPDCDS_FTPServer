@@ -15,13 +15,22 @@ var (
 
 // SimpleAuth implements Auth interface to provide a memory user login auth
 type SimpleAuth struct {
-	Name     string
-	Password string
+	//User     string
+	//Password string
 }
 
 // CheckPasswd will check user's password
-func (a *SimpleAuth) CheckPasswd(name, pass string) (bool, error) {
-	return constantTimeEquals(name, a.Name) && constantTimeEquals(pass, a.Password), nil
+func (a *SimpleAuth) CheckPasswd(user, password string) (bool, error) {
+
+	/**
+	此处需要修改调用API的认证接口,待API开发
+	*/
+	var user0 = "admin"
+	var password0 = "123456"
+
+	var flag = constantTimeEquals(user, user0) && constantTimeEquals(password, password0)
+
+	return flag, nil
 }
 
 func constantTimeEquals(a, b string) bool {

@@ -71,7 +71,7 @@ var (
 		"RETR": commandRetr{},
 		"PASS": commandPass{},
 		"FEAT": commandFeat{},
-		"CLNT": commandClnt{},
+		//"CLNT": {},
 
 		/**黄欣
 		 */
@@ -88,7 +88,7 @@ var (
 		"TYPE": commandType{},
 		"PORT": commandPort{},
 		"QUIT": commandQuit{},
-		//"NOOP": commandNoop{},
+		"NOOP": commandNoop{},
 
 		//命令转义
 		"XPWD": commandPwd{},
@@ -262,6 +262,8 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 //********************************************************************************************************************************
 
 //吴奋强********************************************************************************************************************************
+
+//数据端口获取指定文件的数据
 type commandRetr struct{}
 
 func (cmd commandRetr) IsExtend() bool {
@@ -274,7 +276,11 @@ func (cmd commandRetr) RequireAuth() bool {
 	return true
 }
 func (cmd commandRetr) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
+	//调用API,获取数据类型的根目录
+	homepath := ""
+
+	path := homepath + conn.buildPath(param)
+
 	defer func() {
 		conn.lastFilePos = 0
 		conn.appendData = false
@@ -292,7 +298,8 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	}
 }
 
-//
+//认证密码
+//在auth.go里做API调用
 type commandPass struct{}
 
 func (cmd commandPass) IsExtend() bool {
@@ -304,8 +311,9 @@ func (cmd commandPass) RequireParam() bool {
 func (cmd commandPass) RequireAuth() bool {
 	return false
 }
-func (cmd commandPass) Execute(conn *Conn, param string) {
-	ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
+func (cmd commandPass) Execute(conn *Conn, password string) {
+	var user = conn.reqUser
+	ok, err := conn.server.Auth.CheckPasswd(user, password)
 	if err != nil {
 		conn.writeMessage(550, "Checking password error")
 		return
@@ -320,7 +328,8 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 	}
 }
 
-//
+//获得服务器支持的特性列表
+//暂不修改
 type commandFeat struct{}
 
 func (cmd commandFeat) IsExtend() bool {
@@ -350,19 +359,18 @@ func (cmd commandFeat) Execute(conn *Conn, param string) {
 }
 
 //
-type commandClnt struct{}
-
-func (cmd commandClnt) IsExtend() bool {
-	return false
-}
-func (cmd commandClnt) RequireParam() bool {
-	return false
-}
-func (cmd commandClnt) RequireAuth() bool {
-	return false
-}
-func (cmd commandClnt) Execute(conn *Conn, param string) {
-}
+//type  struct{}
+//func (cmd ) IsExtend() bool {
+//	return false
+//}
+//func (cmd ) RequireParam() bool {
+//	return false
+//}
+//func (cmd ) RequireAuth() bool {
+//	return false
+//}
+//func (cmd ) Execute(conn *Conn, param string) {
+//}
 
 //********************************************************************************************************************************
 
@@ -718,23 +726,23 @@ func (cmd commandOpts) Execute(conn *Conn, param string) {
 //
 // This is essentially a ping from the client so we just respond with an
 // basic 200 message.
-//type commandNoop struct{}
-//
-//func (cmd commandNoop) IsExtend() bool {
-//	return false
-//}
-//
-//func (cmd commandNoop) RequireParam() bool {
-//	return false
-//}
-//
-//func (cmd commandNoop) RequireAuth() bool {
-//	return false
-//}
-//
-//func (cmd commandNoop) Execute(conn *Conn, param string) {
-//	conn.writeMessage(200, "OK")
-//}
+type commandNoop struct{}
+
+func (cmd commandNoop) IsExtend() bool {
+	return false
+}
+
+func (cmd commandNoop) RequireParam() bool {
+	return false
+}
+
+func (cmd commandNoop) RequireAuth() bool {
+	return false
+}
+
+func (cmd commandNoop) Execute(conn *Conn, param string) {
+	conn.writeMessage(200, "OK")
+}
 
 // commandPass respond to the PASS FTP command by asking the driver if the
 // supplied username and password are valid

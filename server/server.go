@@ -164,7 +164,7 @@ func (server *Server) newConn(tcpConn net.Conn, driver Driver) *Conn {
 	c.controlReader = bufio.NewReader(tcpConn)
 	c.controlWriter = bufio.NewWriter(tcpConn)
 	c.driver = driver
-	c.auth = server.Auth
+	//c.auth = server.Auth
 	c.server = server
 	c.sessionID = newSessionID()
 	c.logger = server.logger

@@ -11,7 +11,7 @@ import (
 )
 
 type FileDriver struct {
-	RootPath string
+	//RootPath string
 	server.Perm
 }
 
@@ -37,7 +37,13 @@ func (f *FileInfo) Group() string {
 
 func (driver *FileDriver) realPath(path string) string {
 	paths := strings.Split(path, "/")
-	return filepath.Join(append([]string{driver.RootPath}, paths...)...)
+
+	/**
+	通过API获取数据的真实路径
+	*/
+	var RootPath string = "/tmp"
+
+	return filepath.Join(append([]string{RootPath}, paths...)...)
 }
 
 func (driver *FileDriver) Init(conn *server.Conn) {
@@ -231,10 +237,10 @@ func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bo
 }
 
 type FileDriverFactory struct {
-	RootPath string
+	//RootPath string
 	server.Perm
 }
 
 func (factory *FileDriverFactory) NewDriver() (server.Driver, error) {
-	return &FileDriver{factory.RootPath, factory.Perm}, nil
+	return &FileDriver{ /*factory.RootPath,*/ factory.Perm}, nil
 }
