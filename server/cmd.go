@@ -389,8 +389,11 @@ func (cmd commandCwd) RequireParam() bool {
 func (cmd commandCwd) RequireAuth() bool {
 	return true
 }
+
+//切换目录
 func (cmd commandCwd) Execute(conn *Conn, param string) {
 	path := conn.buildPath(param)
+	//fmt.Print("======================"+conn.LoginUser()+"====="+conn.LoginPass())
 	err := conn.driver.ChangeDir(path)
 	if err == nil {
 		conn.namePrefix = path
@@ -425,12 +428,118 @@ func (cmd commandHelp) IsExtend() bool {
 	return false
 }
 func (cmd commandHelp) RequireParam() bool {
-	return true
+	return false
 }
 func (cmd commandHelp) RequireAuth() bool {
 	return true
 }
+
+const (
+	NLST = "NLST"
+	LIST = "LIST"
+	MLSD = "MLSD"
+	RETR = "RETR"
+	PASS = "PASS"
+	FEAT = "FEAT"
+	CLNT = "CLNT"
+	PWD  = "PWD"
+	CWD  = "CWD"
+	HELP = "HELP"
+	PASV = "PASV"
+	USER = "USER"
+	SYST = "SYST"
+	OPTS = "OPTS"
+	TYPE = "TYPE"
+	PORT = "PORT"
+	QUIT = "QUIT"
+	XPWD = "XPWD"
+	XCWD = "XCWD"
+)
+
 func (cmd commandHelp) Execute(conn *Conn, param string) {
+	if param == "" {
+		mesaage := "The following commands are recognized (* ==>'s unimplemented)." + "\n"
+		cmdStr := [19]string{NLST, LIST, MLSD, RETR, PASS, FEAT, CLNT, PWD, CWD, HELP, PASV, USER, SYST, OPTS, TYPE, PORT, QUIT, XPWD, XCWD}
+		for i := 0; i < len(cmdStr); i++ {
+			mesaage += cmdStr[i] + "\n"
+		}
+		mesaage += "214 HELP command successful."
+		conn.writeMessage(214, mesaage)
+	} else {
+		switch param {
+		case NLST, strings.ToLower(NLST):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> path-name - list directory")
+
+		case LIST, strings.ToLower(LIST):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> path-name - list directory")
+
+		case MLSD, strings.ToLower(MLSD):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> path-name - lists the contents of a directory")
+
+		case RETR, strings.ToLower(RETR):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> file-name - (get file)")
+
+		case PASS, strings.ToLower(PASS):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> password")
+
+		case FEAT, strings.ToLower(FEAT):
+
+			conn.writeMessage(214, "Syntax: "+param+" - (list feature extensions)")
+
+		case CLNT, strings.ToLower(CLNT):
+			//暂未找到释义
+			conn.writeMessage(214, "Syntax: "+param+" <sp> clnt")
+
+		case PWD, strings.ToLower(PWD), XPWD, strings.ToLower(XPWD):
+
+			conn.writeMessage(214, "Syntax: "+param+" - (return current directory)")
+
+		case XCWD, strings.ToLower(XCWD), CWD, strings.ToLower(CWD):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> directory-name - (change directory)")
+
+		case HELP, strings.ToLower(HELP):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> <string> - display help")
+
+		case PASV, strings.ToLower(PASV):
+
+			conn.writeMessage(214, "Syntax: "+param+" - (set server to passive mode)")
+
+		case USER, strings.ToLower(USER):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> username - (logon user)")
+
+		case SYST, strings.ToLower(SYST):
+
+			conn.writeMessage(214, "Syntax: "+param+" - (get operating system type)")
+
+		case OPTS, strings.ToLower(OPTS):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> command <sp> options")
+
+		case TYPE, strings.ToLower(TYPE):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> [ A | E | I | L ]")
+
+		case PORT, strings.ToLower(PORT):
+
+			conn.writeMessage(214, "Syntax: "+param+" <sp> b0,b1,b2,b3,b4,b5")
+
+		case QUIT, strings.ToLower(QUIT):
+
+			conn.writeMessage(214, "Syntax: "+param+" - (terminate service)")
+
+		default:
+			conn.writeMessage(214, "Invalid command!")
+			return
+		}
+	}
 
 }
 
