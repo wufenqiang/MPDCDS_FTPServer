@@ -441,7 +441,7 @@ const (
 	RETR = "RETR"
 	PASS = "PASS"
 	FEAT = "FEAT"
-	CLNT = "CLNT"
+	//CLNT = "CLNT"
 	PWD  = "PWD"
 	CWD  = "CWD"
 	HELP = "HELP"
@@ -459,7 +459,7 @@ const (
 func (cmd commandHelp) Execute(conn *Conn, param string) {
 	if param == "" {
 		mesaage := "The following commands are recognized (* ==>'s unimplemented)." + "\n"
-		cmdStr := [19]string{NLST, LIST, MLSD, RETR, PASS, FEAT, CLNT, PWD, CWD, HELP, PASV, USER, SYST, OPTS, TYPE, PORT, QUIT, XPWD, XCWD}
+		cmdStr := [19]string{NLST, LIST, MLSD, RETR, PASS, FEAT, PWD, CWD, HELP, PASV, USER, SYST, OPTS, TYPE, PORT, QUIT, XPWD, XCWD}
 		for i := 0; i < len(cmdStr); i++ {
 			mesaage += cmdStr[i] + "\n"
 		}
@@ -491,9 +491,9 @@ func (cmd commandHelp) Execute(conn *Conn, param string) {
 
 			conn.writeMessage(214, "Syntax: "+param+" - (list feature extensions)")
 
-		case CLNT, strings.ToLower(CLNT):
-			//暂未找到释义
-			conn.writeMessage(214, "Syntax: "+param+" <sp> clnt")
+		//case CLNT, strings.ToLower(CLNT):
+		//暂未找到释义
+		//conn.writeMessage(214, "Syntax: "+param+" <sp> clnt")
 
 		case PWD, strings.ToLower(PWD), XPWD, strings.ToLower(XPWD):
 
