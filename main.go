@@ -10,8 +10,8 @@ import (
 	"flag"
 	"log"
 
-	"goftpserver/file-driver"
-	"goftpserver/server"
+	"MPDCDS-FTPServer/file-driver"
+	"MPDCDS-FTPServer/server"
 )
 
 func main() {
