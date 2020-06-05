@@ -1,6 +1,8 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/thrift/client"
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -336,6 +338,21 @@ func (cmd commandPass) RequireAuth() bool {
 }
 func (cmd commandPass) Execute(conn *Conn, password string) {
 	var user = conn.reqUser
+	//todo 调用MPDCDS_BackendService auth方法验证用户名和密码是否正确
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	token, err := tClient.Auth(ctx, "111", "222")
+	//关闭tTransport
+	client.Close(tTransport)
+	if err != nil {
+		//todo 用户信息不合法
+
+	} else {
+		//todo 用户信息合法
+		fmt.Print(token)
+	}
+
 	ok, err := conn.server.Auth.CheckPasswd(user, password)
 	if err != nil {
 		conn.writeMessage(550, "Checking password error")
