@@ -3,10 +3,13 @@ package server
 import (
 	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/thrift/client"
+	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Command interface {
@@ -186,6 +189,41 @@ func (cmd commandMlsd) RequireAuth() bool {
 	return false
 }
 func (cmd commandMlsd) Execute(conn *Conn, param string) {
+	//自定义实现，根据path获取当前目录下列表
+	path := conn.buildPath(parseListParam(param))
+
+	//todo 根据path获取当前目录下列表
+	conn.logger.Print(conn.sessionID, path)
+
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	auth, err := tClient.Auth(ctx, "111", "222")
+	if err != nil {
+		//todo 用户信息不合法
+
+	} else {
+		//todo 用户信息合法
+		fmt.Print(auth)
+	}
+	//获取操作对象
+	res, err := tClient.Lists(ctx, auth.Token, path)
+
+	//关闭tTransport
+	client.Close(tTransport)
+	fmt.Println("command nlst res", res)
+
+	var buf bytes.Buffer
+	for i := 0; i < rand.Intn(10); i++ {
+		fmt.Fprintf(&buf, "Size=%d;", rand.Intn(500000))
+		fmt.Fprintf(&buf, "Modify=%s;", time.Now().Format("20060102150405"))
+		fmt.Fprintf(&buf, "Type=file;")
+		fmt.Fprintf(&buf, "Perm=r;")
+		fmt.Fprintf(&buf, "  %d.txt\r\n", rand.Intn(1000))
+	}
+
+	conn.writeMessage(150, "File status okay; about to open data connection")
+	conn.sendOutofbandData(buf.Bytes())
 }
 
 // commandList responds to the LIST FTP command. It allows the client to retreive
@@ -202,7 +240,43 @@ func (cmd commandList) RequireAuth() bool {
 	return true
 }
 func (cmd commandList) Execute(conn *Conn, param string) {
+	//自定义实现，根据path获取当前目录下列表
 	path := conn.buildPath(parseListParam(param))
+
+	//todo 根据path获取当前目录下列表
+	conn.logger.Print(conn.sessionID, path)
+
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	auth, err := tClient.Auth(ctx, "111", "222")
+	if err != nil {
+		//todo 用户信息不合法
+
+	} else {
+		//todo 用户信息合法
+		fmt.Print(auth)
+	}
+	//获取操作对象
+	res, err := tClient.Lists(ctx, auth.Token, path)
+
+	//关闭tTransport
+	client.Close(tTransport)
+	fmt.Println("command nlst res", res)
+
+	var buf bytes.Buffer
+	for i := 0; i < 5; i++ {
+		fmt.Fprintf(&buf, "-rwxrwxrwx")
+		fmt.Fprintf(&buf, " 1 %s %s ", "USER", "GROUP")
+		fmt.Fprintf(&buf, lpad(strconv.FormatInt(rand.Int63n(6581321), 10), 12))
+		fmt.Fprintf(&buf, time.Now().Format(" Jan _2 15:04 "))
+		fmt.Fprintf(&buf, "%s.txt\r\n", lpad(strconv.FormatInt(rand.Int63n(200), 10), 12))
+	}
+
+	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+	conn.sendOutofbandData(buf.Bytes())
+
+	/*path := conn.buildPath(parseListParam(param))
 	info, err := conn.driver.Stat(path)
 	if err != nil {
 		conn.writeMessage(550, err.Error())
@@ -228,7 +302,7 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	}
 
 	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
-	conn.sendOutofbandData(listFormatter(files).Detailed())
+	conn.sendOutofbandData(listFormatter(files).Detailed())*/
 }
 func parseListParam(param string) (path string) {
 	if len(param) == 0 {
@@ -261,28 +335,61 @@ func (cmd commandNlst) RequireAuth() bool {
 	return true
 }
 func (cmd commandNlst) Execute(conn *Conn, param string) {
-	path := conn.buildPath(parseListParam(param))
-	info, err := conn.driver.Stat(path)
-	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
-	}
-	if !info.IsDir() {
-		conn.writeMessage(550, param+" is not a directory")
-		return
-	}
 
-	var files []FileInfo
-	err = conn.driver.ListDir(path, func(f FileInfo) error {
-		files = append(files, f)
-		return nil
-	})
+	//自定义实现，根据path调用后台API获取FileNames
+	path := conn.buildPath(parseListParam(param))
+
+	//todo 根据path调用后台API获取FileNames
+	conn.logger.Print(conn.sessionID, path)
+
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	auth, err := tClient.Auth(ctx, "111", "222")
 	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
+		//todo 用户信息不合法
+
+	} else {
+		//todo 用户信息合法
+		fmt.Print(auth)
+	}
+	//获取操作对象
+	res, err := tClient.Lists(ctx, auth.Token, path)
+
+	//关闭tTransport
+	client.Close(tTransport)
+	fmt.Println("command nlst res", res)
+
+	var buf bytes.Buffer
+	for _, fileName := range []string{"aaa.txt", "bbb.txt"} {
+		fmt.Fprintf(&buf, "%s\r\n", fileName)
 	}
 	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
-	conn.sendOutofbandData(listFormatter(files).Short())
+	conn.sendOutofbandData(buf.Bytes())
+
+	/*
+		path := conn.buildPath(parseListParam(param))
+		info, err := conn.driver.Stat(path)
+		if err != nil {
+			conn.writeMessage(550, err.Error())
+			return
+		}
+		if !info.IsDir() {
+			conn.writeMessage(550, param+" is not a directory")
+			return
+		}
+
+		var files []FileInfo
+		err = conn.driver.ListDir(path, func(f FileInfo) error {
+			files = append(files, f)
+			return nil
+		})
+		if err != nil {
+			conn.writeMessage(550, err.Error())
+			return
+		}
+		conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+		conn.sendOutofbandData(listFormatter(files).Short())*/
 }
 
 //********************************************************************************************************************************
