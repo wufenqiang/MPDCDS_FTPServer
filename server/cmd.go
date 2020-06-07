@@ -1,6 +1,7 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/thrift/client"
 	"context"
 	"fmt"
@@ -342,30 +343,35 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	token, err := tClient.Auth(ctx, "111", "222")
+	auth, err := tClient.Auth(ctx, user, password)
 	//关闭tTransport
 	client.Close(tTransport)
 	if err != nil {
 		//todo 用户信息不合法
-
+		conn.writeMessage(530, "Incorrect password, not logged in")
 	} else {
 		//todo 用户信息合法
-		fmt.Print(token)
-	}
+		logger.GetLogger().Info("=token=" + auth.Token)
+		if auth.Status == 0 {
+			conn.writeMessage(230, "Password ok, continue")
+		} else {
+			conn.writeMessage(530, auth.Msg)
+		}
 
-	ok, err := conn.server.Auth.CheckPasswd(user, password)
-	if err != nil {
-		conn.writeMessage(550, "Checking password error")
-		return
 	}
+	//ok, err := conn.server.Auth.CheckPasswd(user, password)
+	//if err != nil {
+	//	conn.writeMessage(550, "Checking password error")
+	//	return
+	//}
 
-	if ok {
-		conn.user = conn.reqUser
-		conn.reqUser = ""
-		conn.writeMessage(230, "Password ok, continue")
-	} else {
-		conn.writeMessage(530, "Incorrect password, not logged in")
-	}
+	//if ok {
+	//	conn.user = conn.reqUser
+	//	conn.reqUser = ""
+	//	conn.writeMessage(230, "Password ok, continue")
+	//} else {
+	//	conn.writeMessage(530, "Incorrect password, not logged in")
+	//}
 }
 
 //获得服务器支持的特性列表

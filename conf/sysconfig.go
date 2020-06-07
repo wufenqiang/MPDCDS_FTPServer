@@ -24,4 +24,8 @@ type sysconfig struct {
 	//thrift 服务ip
 	NetworkAddr string `json:"NetworkAddr"`
 	ThriftPort  string `json:"ThriftPort"`
+
+	//日志存储地址、级别
+	LoggerPath  string `json:"LoggerPath"`
+	LoggerLevel string `json:"LoggerLevel"`
 }

@@ -23,9 +23,9 @@ func Usage() {
 	fmt.Fprintln(os.Stderr, "Usage of ", os.Args[0], " [-h host:port] [-u url] [-f[ramed]] function [arg1 [arg2...]]:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "\nFunctions:")
-	fmt.Fprintln(os.Stderr, "  string auth(string user, string password)")
-	fmt.Fprintln(os.Stderr, "   lists(string token, string pwd)")
-	fmt.Fprintln(os.Stderr, "   file(string pwd, string path)")
+	fmt.Fprintln(os.Stderr, "  Auth auth(string user, string password)")
+	fmt.Fprintln(os.Stderr, "  FileDirInfo lists(string token, string pwd)")
+	fmt.Fprintln(os.Stderr, "  FileInfo file(string pwd, string path)")
 	fmt.Fprintln(os.Stderr)
 	os.Exit(0)
 }

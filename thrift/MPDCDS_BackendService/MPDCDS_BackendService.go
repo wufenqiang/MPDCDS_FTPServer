@@ -18,6 +18,629 @@ var _ = context.Background
 var _ = reflect.DeepEqual
 var _ = bytes.Equal
 
+// Attributes:
+//  - Status
+//  - Msg
+//  - Token
+type Auth struct {
+	Status int16  `thrift:"status,1" db:"status" json:"status"`
+	Msg    string `thrift:"msg,2" db:"msg" json:"msg"`
+	Token  string `thrift:"token,3" db:"token" json:"token"`
+}
+
+func NewAuth() *Auth {
+	return &Auth{}
+}
+
+func (p *Auth) GetStatus() int16 {
+	return p.Status
+}
+
+func (p *Auth) GetMsg() string {
+	return p.Msg
+}
+
+func (p *Auth) GetToken() string {
+	return p.Token
+}
+func (p *Auth) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I16 {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField3(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *Auth) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI16(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Status = v
+	}
+	return nil
+}
+
+func (p *Auth) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 2: ", err)
+	} else {
+		p.Msg = v
+	}
+	return nil
+}
+
+func (p *Auth) ReadField3(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 3: ", err)
+	} else {
+		p.Token = v
+	}
+	return nil
+}
+
+func (p *Auth) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("Auth"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField3(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *Auth) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("status", thrift.I16, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:status: ", p), err)
+	}
+	if err := oprot.WriteI16(int16(p.Status)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.status (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:status: ", p), err)
+	}
+	return err
+}
+
+func (p *Auth) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("msg", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:msg: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Msg)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.msg (2) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:msg: ", p), err)
+	}
+	return err
+}
+
+func (p *Auth) writeField3(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("token", thrift.STRING, 3); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:token: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Token)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.token (3) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 3:token: ", p), err)
+	}
+	return err
+}
+
+func (p *Auth) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("Auth(%+v)", *p)
+}
+
+// Attributes:
+//  - Status
+//  - Msg
+//  - Data
+type FileDirInfo struct {
+	Status int16               `thrift:"status,1" db:"status" json:"status"`
+	Msg    string              `thrift:"msg,2" db:"msg" json:"msg"`
+	Data   []map[string]string `thrift:"data,3" db:"data" json:"data"`
+}
+
+func NewFileDirInfo() *FileDirInfo {
+	return &FileDirInfo{}
+}
+
+func (p *FileDirInfo) GetStatus() int16 {
+	return p.Status
+}
+
+func (p *FileDirInfo) GetMsg() string {
+	return p.Msg
+}
+
+func (p *FileDirInfo) GetData() []map[string]string {
+	return p.Data
+}
+func (p *FileDirInfo) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I16 {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.LIST {
+				if err := p.ReadField3(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *FileDirInfo) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI16(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Status = v
+	}
+	return nil
+}
+
+func (p *FileDirInfo) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 2: ", err)
+	} else {
+		p.Msg = v
+	}
+	return nil
+}
+
+func (p *FileDirInfo) ReadField3(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return thrift.PrependError("error reading list begin: ", err)
+	}
+	tSlice := make([]map[string]string, 0, size)
+	p.Data = tSlice
+	for i := 0; i < size; i++ {
+		_, _, size, err := iprot.ReadMapBegin()
+		if err != nil {
+			return thrift.PrependError("error reading map begin: ", err)
+		}
+		tMap := make(map[string]string, size)
+		_elem0 := tMap
+		for i := 0; i < size; i++ {
+			var _key1 string
+			if v, err := iprot.ReadString(); err != nil {
+				return thrift.PrependError("error reading field 0: ", err)
+			} else {
+				_key1 = v
+			}
+			var _val2 string
+			if v, err := iprot.ReadString(); err != nil {
+				return thrift.PrependError("error reading field 0: ", err)
+			} else {
+				_val2 = v
+			}
+			_elem0[_key1] = _val2
+		}
+		if err := iprot.ReadMapEnd(); err != nil {
+			return thrift.PrependError("error reading map end: ", err)
+		}
+		p.Data = append(p.Data, _elem0)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return thrift.PrependError("error reading list end: ", err)
+	}
+	return nil
+}
+
+func (p *FileDirInfo) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("FileDirInfo"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField3(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *FileDirInfo) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("status", thrift.I16, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:status: ", p), err)
+	}
+	if err := oprot.WriteI16(int16(p.Status)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.status (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:status: ", p), err)
+	}
+	return err
+}
+
+func (p *FileDirInfo) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("msg", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:msg: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Msg)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.msg (2) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:msg: ", p), err)
+	}
+	return err
+}
+
+func (p *FileDirInfo) writeField3(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("data", thrift.LIST, 3); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:data: ", p), err)
+	}
+	if err := oprot.WriteListBegin(thrift.MAP, len(p.Data)); err != nil {
+		return thrift.PrependError("error writing list begin: ", err)
+	}
+	for _, v := range p.Data {
+		if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(v)); err != nil {
+			return thrift.PrependError("error writing map begin: ", err)
+		}
+		for k, v := range v {
+			if err := oprot.WriteString(string(k)); err != nil {
+				return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			}
+			if err := oprot.WriteString(string(v)); err != nil {
+				return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			}
+		}
+		if err := oprot.WriteMapEnd(); err != nil {
+			return thrift.PrependError("error writing map end: ", err)
+		}
+	}
+	if err := oprot.WriteListEnd(); err != nil {
+		return thrift.PrependError("error writing list end: ", err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 3:data: ", p), err)
+	}
+	return err
+}
+
+func (p *FileDirInfo) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("FileDirInfo(%+v)", *p)
+}
+
+// Attributes:
+//  - Status
+//  - Msg
+//  - Data
+type FileInfo struct {
+	Status int16             `thrift:"status,1" db:"status" json:"status"`
+	Msg    string            `thrift:"msg,2" db:"msg" json:"msg"`
+	Data   map[string]string `thrift:"data,3" db:"data" json:"data"`
+}
+
+func NewFileInfo() *FileInfo {
+	return &FileInfo{}
+}
+
+func (p *FileInfo) GetStatus() int16 {
+	return p.Status
+}
+
+func (p *FileInfo) GetMsg() string {
+	return p.Msg
+}
+
+func (p *FileInfo) GetData() map[string]string {
+	return p.Data
+}
+func (p *FileInfo) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I16 {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.MAP {
+				if err := p.ReadField3(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *FileInfo) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI16(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Status = v
+	}
+	return nil
+}
+
+func (p *FileInfo) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 2: ", err)
+	} else {
+		p.Msg = v
+	}
+	return nil
+}
+
+func (p *FileInfo) ReadField3(iprot thrift.TProtocol) error {
+	_, _, size, err := iprot.ReadMapBegin()
+	if err != nil {
+		return thrift.PrependError("error reading map begin: ", err)
+	}
+	tMap := make(map[string]string, size)
+	p.Data = tMap
+	for i := 0; i < size; i++ {
+		var _key3 string
+		if v, err := iprot.ReadString(); err != nil {
+			return thrift.PrependError("error reading field 0: ", err)
+		} else {
+			_key3 = v
+		}
+		var _val4 string
+		if v, err := iprot.ReadString(); err != nil {
+			return thrift.PrependError("error reading field 0: ", err)
+		} else {
+			_val4 = v
+		}
+		p.Data[_key3] = _val4
+	}
+	if err := iprot.ReadMapEnd(); err != nil {
+		return thrift.PrependError("error reading map end: ", err)
+	}
+	return nil
+}
+
+func (p *FileInfo) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("FileInfo"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField3(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *FileInfo) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("status", thrift.I16, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:status: ", p), err)
+	}
+	if err := oprot.WriteI16(int16(p.Status)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.status (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:status: ", p), err)
+	}
+	return err
+}
+
+func (p *FileInfo) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("msg", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:msg: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Msg)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.msg (2) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:msg: ", p), err)
+	}
+	return err
+}
+
+func (p *FileInfo) writeField3(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("data", thrift.MAP, 3); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:data: ", p), err)
+	}
+	if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Data)); err != nil {
+		return thrift.PrependError("error writing map begin: ", err)
+	}
+	for k, v := range p.Data {
+		if err := oprot.WriteString(string(k)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+		}
+		if err := oprot.WriteString(string(v)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+		}
+	}
+	if err := oprot.WriteMapEnd(); err != nil {
+		return thrift.PrependError("error writing map end: ", err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 3:data: ", p), err)
+	}
+	return err
+}
+
+func (p *FileInfo) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("FileInfo(%+v)", *p)
+}
+
 type MPDCDS_BackendService interface { //
 	//多协议数据采集和分配系统接口服务
 
@@ -30,8 +653,8 @@ type MPDCDS_BackendService interface { //
 	// Parameters:
 	//  - User
 	//  - Password
-	Auth(ctx context.Context, user string, password string) (r string, err error)
-	// 权限验证接口
+	Auth(ctx context.Context, user string, password string) (r *Auth, err error)
+	// 目录信息和列表信息接口
 	// 1:token
 	// 2:pwd   当前目录地址
 	// 返回值：目录和文件列表
@@ -40,7 +663,7 @@ type MPDCDS_BackendService interface { //
 	// Parameters:
 	//  - Token
 	//  - Pwd
-	Lists(ctx context.Context, token string, pwd string) (r []map[string]string, err error)
+	Lists(ctx context.Context, token string, pwd string) (r *FileDirInfo, err error)
 	// 文件信息
 	// 1:token
 	// 2:pwd   当前目录地址
@@ -50,7 +673,7 @@ type MPDCDS_BackendService interface { //
 	// Parameters:
 	//  - Pwd
 	//  - Path
-	File(ctx context.Context, pwd string, path string) (r map[string]string, err error)
+	File(ctx context.Context, pwd string, path string) (r *FileInfo, err error)
 }
 
 //
@@ -90,18 +713,18 @@ func (p *MPDCDS_BackendServiceClient) Client_() thrift.TClient {
 // Parameters:
 //  - User
 //  - Password
-func (p *MPDCDS_BackendServiceClient) Auth(ctx context.Context, user string, password string) (r string, err error) {
-	var _args0 MPDCDS_BackendServiceAuthArgs
-	_args0.User = user
-	_args0.Password = password
-	var _result1 MPDCDS_BackendServiceAuthResult
-	if err = p.Client_().Call(ctx, "auth", &_args0, &_result1); err != nil {
+func (p *MPDCDS_BackendServiceClient) Auth(ctx context.Context, user string, password string) (r *Auth, err error) {
+	var _args5 MPDCDS_BackendServiceAuthArgs
+	_args5.User = user
+	_args5.Password = password
+	var _result6 MPDCDS_BackendServiceAuthResult
+	if err = p.Client_().Call(ctx, "auth", &_args5, &_result6); err != nil {
 		return
 	}
-	return _result1.GetSuccess(), nil
+	return _result6.GetSuccess(), nil
 }
 
-// 权限验证接口
+// 目录信息和列表信息接口
 // 1:token
 // 2:pwd   当前目录地址
 // 返回值：目录和文件列表
@@ -110,15 +733,15 @@ func (p *MPDCDS_BackendServiceClient) Auth(ctx context.Context, user string, pas
 // Parameters:
 //  - Token
 //  - Pwd
-func (p *MPDCDS_BackendServiceClient) Lists(ctx context.Context, token string, pwd string) (r []map[string]string, err error) {
-	var _args2 MPDCDS_BackendServiceListsArgs
-	_args2.Token = token
-	_args2.Pwd = pwd
-	var _result3 MPDCDS_BackendServiceListsResult
-	if err = p.Client_().Call(ctx, "lists", &_args2, &_result3); err != nil {
+func (p *MPDCDS_BackendServiceClient) Lists(ctx context.Context, token string, pwd string) (r *FileDirInfo, err error) {
+	var _args7 MPDCDS_BackendServiceListsArgs
+	_args7.Token = token
+	_args7.Pwd = pwd
+	var _result8 MPDCDS_BackendServiceListsResult
+	if err = p.Client_().Call(ctx, "lists", &_args7, &_result8); err != nil {
 		return
 	}
-	return _result3.GetSuccess(), nil
+	return _result8.GetSuccess(), nil
 }
 
 // 文件信息
@@ -130,15 +753,15 @@ func (p *MPDCDS_BackendServiceClient) Lists(ctx context.Context, token string, p
 // Parameters:
 //  - Pwd
 //  - Path
-func (p *MPDCDS_BackendServiceClient) File(ctx context.Context, pwd string, path string) (r map[string]string, err error) {
-	var _args4 MPDCDS_BackendServiceFileArgs
-	_args4.Pwd = pwd
-	_args4.Path = path
-	var _result5 MPDCDS_BackendServiceFileResult
-	if err = p.Client_().Call(ctx, "file", &_args4, &_result5); err != nil {
+func (p *MPDCDS_BackendServiceClient) File(ctx context.Context, pwd string, path string) (r *FileInfo, err error) {
+	var _args9 MPDCDS_BackendServiceFileArgs
+	_args9.Pwd = pwd
+	_args9.Path = path
+	var _result10 MPDCDS_BackendServiceFileResult
+	if err = p.Client_().Call(ctx, "file", &_args9, &_result10); err != nil {
 		return
 	}
-	return _result5.GetSuccess(), nil
+	return _result10.GetSuccess(), nil
 }
 
 type MPDCDS_BackendServiceProcessor struct {
@@ -161,11 +784,11 @@ func (p *MPDCDS_BackendServiceProcessor) ProcessorMap() map[string]thrift.TProce
 
 func NewMPDCDS_BackendServiceProcessor(handler MPDCDS_BackendService) *MPDCDS_BackendServiceProcessor {
 
-	self6 := &MPDCDS_BackendServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
-	self6.processorMap["auth"] = &mPDCDS_BackendServiceProcessorAuth{handler: handler}
-	self6.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
-	self6.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
-	return self6
+	self11 := &MPDCDS_BackendServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
+	self11.processorMap["auth"] = &mPDCDS_BackendServiceProcessorAuth{handler: handler}
+	self11.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
+	self11.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
+	return self11
 }
 
 func (p *MPDCDS_BackendServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -178,12 +801,12 @@ func (p *MPDCDS_BackendServiceProcessor) Process(ctx context.Context, iprot, opr
 	}
 	iprot.Skip(thrift.STRUCT)
 	iprot.ReadMessageEnd()
-	x7 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
+	x12 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
 	oprot.WriteMessageBegin(name, thrift.EXCEPTION, seqId)
-	x7.Write(oprot)
+	x12.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Flush(ctx)
-	return false, x7
+	return false, x12
 
 }
 
@@ -205,7 +828,7 @@ func (p *mPDCDS_BackendServiceProcessorAuth) Process(ctx context.Context, seqId 
 
 	iprot.ReadMessageEnd()
 	result := MPDCDS_BackendServiceAuthResult{}
-	var retval string
+	var retval *Auth
 	var err2 error
 	if retval, err2 = p.handler.Auth(ctx, args.User, args.Password); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing auth: "+err2.Error())
@@ -215,7 +838,7 @@ func (p *mPDCDS_BackendServiceProcessorAuth) Process(ctx context.Context, seqId 
 		oprot.Flush(ctx)
 		return true, err2
 	} else {
-		result.Success = &retval
+		result.Success = retval
 	}
 	if err2 = oprot.WriteMessageBegin("auth", thrift.REPLY, seqId); err2 != nil {
 		err = err2
@@ -253,7 +876,7 @@ func (p *mPDCDS_BackendServiceProcessorLists) Process(ctx context.Context, seqId
 
 	iprot.ReadMessageEnd()
 	result := MPDCDS_BackendServiceListsResult{}
-	var retval []map[string]string
+	var retval *FileDirInfo
 	var err2 error
 	if retval, err2 = p.handler.Lists(ctx, args.Token, args.Pwd); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing lists: "+err2.Error())
@@ -301,7 +924,7 @@ func (p *mPDCDS_BackendServiceProcessorFile) Process(ctx context.Context, seqId 
 
 	iprot.ReadMessageEnd()
 	result := MPDCDS_BackendServiceFileResult{}
-	var retval map[string]string
+	var retval *FileInfo
 	var err2 error
 	if retval, err2 = p.handler.File(ctx, args.Pwd, args.Path); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing file: "+err2.Error())
@@ -476,20 +1099,20 @@ func (p *MPDCDS_BackendServiceAuthArgs) String() string {
 // Attributes:
 //  - Success
 type MPDCDS_BackendServiceAuthResult struct {
-	Success *string `thrift:"success,0" db:"success" json:"success,omitempty"`
+	Success *Auth `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
 func NewMPDCDS_BackendServiceAuthResult() *MPDCDS_BackendServiceAuthResult {
 	return &MPDCDS_BackendServiceAuthResult{}
 }
 
-var MPDCDS_BackendServiceAuthResult_Success_DEFAULT string
+var MPDCDS_BackendServiceAuthResult_Success_DEFAULT *Auth
 
-func (p *MPDCDS_BackendServiceAuthResult) GetSuccess() string {
+func (p *MPDCDS_BackendServiceAuthResult) GetSuccess() *Auth {
 	if !p.IsSetSuccess() {
 		return MPDCDS_BackendServiceAuthResult_Success_DEFAULT
 	}
-	return *p.Success
+	return p.Success
 }
 func (p *MPDCDS_BackendServiceAuthResult) IsSetSuccess() bool {
 	return p.Success != nil
@@ -510,7 +1133,7 @@ func (p *MPDCDS_BackendServiceAuthResult) Read(iprot thrift.TProtocol) error {
 		}
 		switch fieldId {
 		case 0:
-			if fieldTypeId == thrift.STRING {
+			if fieldTypeId == thrift.STRUCT {
 				if err := p.ReadField0(iprot); err != nil {
 					return err
 				}
@@ -535,10 +1158,9 @@ func (p *MPDCDS_BackendServiceAuthResult) Read(iprot thrift.TProtocol) error {
 }
 
 func (p *MPDCDS_BackendServiceAuthResult) ReadField0(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadString(); err != nil {
-		return thrift.PrependError("error reading field 0: ", err)
-	} else {
-		p.Success = &v
+	p.Success = &Auth{}
+	if err := p.Success.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
 	}
 	return nil
 }
@@ -563,11 +1185,11 @@ func (p *MPDCDS_BackendServiceAuthResult) Write(oprot thrift.TProtocol) error {
 
 func (p *MPDCDS_BackendServiceAuthResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
-		if err := oprot.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
 		}
-		if err := oprot.WriteString(string(*p.Success)); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err)
+		if err := p.Success.Write(oprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
 		}
 		if err := oprot.WriteFieldEnd(); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
@@ -726,16 +1348,19 @@ func (p *MPDCDS_BackendServiceListsArgs) String() string {
 // Attributes:
 //  - Success
 type MPDCDS_BackendServiceListsResult struct {
-	Success []map[string]string `thrift:"success,0" db:"success" json:"success,omitempty"`
+	Success *FileDirInfo `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
 func NewMPDCDS_BackendServiceListsResult() *MPDCDS_BackendServiceListsResult {
 	return &MPDCDS_BackendServiceListsResult{}
 }
 
-var MPDCDS_BackendServiceListsResult_Success_DEFAULT []map[string]string
+var MPDCDS_BackendServiceListsResult_Success_DEFAULT *FileDirInfo
 
-func (p *MPDCDS_BackendServiceListsResult) GetSuccess() []map[string]string {
+func (p *MPDCDS_BackendServiceListsResult) GetSuccess() *FileDirInfo {
+	if !p.IsSetSuccess() {
+		return MPDCDS_BackendServiceListsResult_Success_DEFAULT
+	}
 	return p.Success
 }
 func (p *MPDCDS_BackendServiceListsResult) IsSetSuccess() bool {
@@ -757,7 +1382,7 @@ func (p *MPDCDS_BackendServiceListsResult) Read(iprot thrift.TProtocol) error {
 		}
 		switch fieldId {
 		case 0:
-			if fieldTypeId == thrift.LIST {
+			if fieldTypeId == thrift.STRUCT {
 				if err := p.ReadField0(iprot); err != nil {
 					return err
 				}
@@ -782,41 +1407,9 @@ func (p *MPDCDS_BackendServiceListsResult) Read(iprot thrift.TProtocol) error {
 }
 
 func (p *MPDCDS_BackendServiceListsResult) ReadField0(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
-		return thrift.PrependError("error reading list begin: ", err)
-	}
-	tSlice := make([]map[string]string, 0, size)
-	p.Success = tSlice
-	for i := 0; i < size; i++ {
-		_, _, size, err := iprot.ReadMapBegin()
-		if err != nil {
-			return thrift.PrependError("error reading map begin: ", err)
-		}
-		tMap := make(map[string]string, size)
-		_elem8 := tMap
-		for i := 0; i < size; i++ {
-			var _key9 string
-			if v, err := iprot.ReadString(); err != nil {
-				return thrift.PrependError("error reading field 0: ", err)
-			} else {
-				_key9 = v
-			}
-			var _val10 string
-			if v, err := iprot.ReadString(); err != nil {
-				return thrift.PrependError("error reading field 0: ", err)
-			} else {
-				_val10 = v
-			}
-			_elem8[_key9] = _val10
-		}
-		if err := iprot.ReadMapEnd(); err != nil {
-			return thrift.PrependError("error reading map end: ", err)
-		}
-		p.Success = append(p.Success, _elem8)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return thrift.PrependError("error reading list end: ", err)
+	p.Success = &FileDirInfo{}
+	if err := p.Success.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
 	}
 	return nil
 }
@@ -841,30 +1434,11 @@ func (p *MPDCDS_BackendServiceListsResult) Write(oprot thrift.TProtocol) error {
 
 func (p *MPDCDS_BackendServiceListsResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
-		if err := oprot.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
+		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
 		}
-		if err := oprot.WriteListBegin(thrift.MAP, len(p.Success)); err != nil {
-			return thrift.PrependError("error writing list begin: ", err)
-		}
-		for _, v := range p.Success {
-			if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(v)); err != nil {
-				return thrift.PrependError("error writing map begin: ", err)
-			}
-			for k, v := range v {
-				if err := oprot.WriteString(string(k)); err != nil {
-					return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
-				}
-				if err := oprot.WriteString(string(v)); err != nil {
-					return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
-				}
-			}
-			if err := oprot.WriteMapEnd(); err != nil {
-				return thrift.PrependError("error writing map end: ", err)
-			}
-		}
-		if err := oprot.WriteListEnd(); err != nil {
-			return thrift.PrependError("error writing list end: ", err)
+		if err := p.Success.Write(oprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
 		}
 		if err := oprot.WriteFieldEnd(); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
@@ -1023,16 +1597,19 @@ func (p *MPDCDS_BackendServiceFileArgs) String() string {
 // Attributes:
 //  - Success
 type MPDCDS_BackendServiceFileResult struct {
-	Success map[string]string `thrift:"success,0" db:"success" json:"success,omitempty"`
+	Success *FileInfo `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
 func NewMPDCDS_BackendServiceFileResult() *MPDCDS_BackendServiceFileResult {
 	return &MPDCDS_BackendServiceFileResult{}
 }
 
-var MPDCDS_BackendServiceFileResult_Success_DEFAULT map[string]string
+var MPDCDS_BackendServiceFileResult_Success_DEFAULT *FileInfo
 
-func (p *MPDCDS_BackendServiceFileResult) GetSuccess() map[string]string {
+func (p *MPDCDS_BackendServiceFileResult) GetSuccess() *FileInfo {
+	if !p.IsSetSuccess() {
+		return MPDCDS_BackendServiceFileResult_Success_DEFAULT
+	}
 	return p.Success
 }
 func (p *MPDCDS_BackendServiceFileResult) IsSetSuccess() bool {
@@ -1054,7 +1631,7 @@ func (p *MPDCDS_BackendServiceFileResult) Read(iprot thrift.TProtocol) error {
 		}
 		switch fieldId {
 		case 0:
-			if fieldTypeId == thrift.MAP {
+			if fieldTypeId == thrift.STRUCT {
 				if err := p.ReadField0(iprot); err != nil {
 					return err
 				}
@@ -1079,29 +1656,9 @@ func (p *MPDCDS_BackendServiceFileResult) Read(iprot thrift.TProtocol) error {
 }
 
 func (p *MPDCDS_BackendServiceFileResult) ReadField0(iprot thrift.TProtocol) error {
-	_, _, size, err := iprot.ReadMapBegin()
-	if err != nil {
-		return thrift.PrependError("error reading map begin: ", err)
-	}
-	tMap := make(map[string]string, size)
-	p.Success = tMap
-	for i := 0; i < size; i++ {
-		var _key11 string
-		if v, err := iprot.ReadString(); err != nil {
-			return thrift.PrependError("error reading field 0: ", err)
-		} else {
-			_key11 = v
-		}
-		var _val12 string
-		if v, err := iprot.ReadString(); err != nil {
-			return thrift.PrependError("error reading field 0: ", err)
-		} else {
-			_val12 = v
-		}
-		p.Success[_key11] = _val12
-	}
-	if err := iprot.ReadMapEnd(); err != nil {
-		return thrift.PrependError("error reading map end: ", err)
+	p.Success = &FileInfo{}
+	if err := p.Success.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
 	}
 	return nil
 }
@@ -1126,22 +1683,11 @@ func (p *MPDCDS_BackendServiceFileResult) Write(oprot thrift.TProtocol) error {
 
 func (p *MPDCDS_BackendServiceFileResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
-		if err := oprot.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
+		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
 		}
-		if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Success)); err != nil {
-			return thrift.PrependError("error writing map begin: ", err)
-		}
-		for k, v := range p.Success {
-			if err := oprot.WriteString(string(k)); err != nil {
-				return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
-			}
-			if err := oprot.WriteString(string(v)); err != nil {
-				return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
-			}
-		}
-		if err := oprot.WriteMapEnd(); err != nil {
-			return thrift.PrependError("error writing map end: ", err)
+		if err := p.Success.Write(oprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
 		}
 		if err := oprot.WriteFieldEnd(); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
