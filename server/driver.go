@@ -24,7 +24,7 @@ type Driver interface {
 	// params  - path
 	// returns - true if the current user is permitted to change to the
 	//           requested path
-	ChangeDir(string) error
+	ChangeDir(string, string) error
 
 	// params  - path, function on file or subdir found
 	// returns - error

@@ -446,7 +446,7 @@ func (cmd commandPass) RequireAuth() bool {
 }
 func (cmd commandPass) Execute(conn *Conn, password string) {
 	var user = conn.reqUser
-	//todo 调用MPDCDS_BackendService auth方法验证用户名和密码是否正确
+	// 调用MPDCDS_BackendService auth方法验证用户名和密码是否正确
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
@@ -454,31 +454,21 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 	//关闭tTransport
 	client.Close(tTransport)
 	if err != nil {
-		//todo 用户信息不合法
+		// 用户信息不合法
 		conn.writeMessage(530, "Incorrect password, not logged in")
 	} else {
-		//todo 用户信息合法
+		// 用户信息合法
 		logger.GetLogger().Info("=token=" + auth.Token)
 		if auth.Status == 0 {
+			conn.user = conn.reqUser
+			conn.reqUser = ""
+			conn.token = auth.Token
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
 			conn.writeMessage(530, auth.Msg)
 		}
 
 	}
-	//ok, err := conn.server.Auth.CheckPasswd(user, password)
-	//if err != nil {
-	//	conn.writeMessage(550, "Checking password error")
-	//	return
-	//}
-
-	//if ok {
-	//	conn.user = conn.reqUser
-	//	conn.reqUser = ""
-	//	conn.writeMessage(230, "Password ok, continue")
-	//} else {
-	//	conn.writeMessage(530, "Incorrect password, not logged in")
-	//}
 }
 
 //获得服务器支持的特性列表
@@ -546,8 +536,8 @@ func (cmd commandCwd) RequireAuth() bool {
 //切换目录
 func (cmd commandCwd) Execute(conn *Conn, param string) {
 	path := conn.buildPath(param)
-	//fmt.Print("======================"+conn.LoginUser()+"====="+conn.LoginPass())
-	err := conn.driver.ChangeDir(path)
+	token := conn.token
+	err := conn.driver.ChangeDir(path, token)
 	if err == nil {
 		conn.namePrefix = path
 		conn.writeMessage(250, "Directory changed to "+path)

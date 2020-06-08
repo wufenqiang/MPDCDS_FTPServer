@@ -1,6 +1,7 @@
 package filedriver
 
 import (
+	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/server"
 	"container/list"
 	"errors"
@@ -51,9 +52,10 @@ func (driver *FileDriver) Init(conn *server.Conn) {
 	//driver.conn = conn
 }
 
-func (driver *FileDriver) ChangeDir(path string) error {
+func (driver *FileDriver) ChangeDir(path string, token string) error {
 	rPath := driver.realPath(path)
 	ext := filepath.Ext(rPath)
+	logger.GetLogger().Info("token==============" + token)
 	if ext != "" {
 		return errors.New("Not a directory")
 	}
