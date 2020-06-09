@@ -28,4 +28,8 @@ type sysconfig struct {
 	//日志存储地址、级别
 	LoggerPath  string `json:"LoggerPath"`
 	LoggerLevel string `json:"LoggerLevel"`
+
+	//ftp相关配置
+	FTPHost    string `json:FTPHost`
+	FTPCmdPort int    `json:FTPCmdPort`
 }

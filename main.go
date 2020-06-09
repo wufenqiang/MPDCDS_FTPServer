@@ -7,6 +7,7 @@
 package main
 
 import (
+	"MPDCDS_FTPServer/conf"
 	"flag"
 	"log"
 
@@ -19,8 +20,8 @@ func main() {
 		//root = flag.String("root", "/tmp", "Root directory to serve")
 		//user = flag.String("user", "admin", "Username for login")
 		//pass = flag.String("pass", "123456", "Password for login")
-		port = flag.Int("port", 21, "Port")
-		host = flag.String("host", "127.0.0.1", "Host")
+		port = flag.Int("port", conf.Sysconfig.FTPCmdPort, "Port")
+		host = flag.String("host", conf.Sysconfig.FTPHost, "Host")
 	)
 	flag.Parse()
 	//if *root == "" {

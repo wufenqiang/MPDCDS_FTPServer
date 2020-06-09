@@ -4,5 +4,8 @@
   "ThriftPort": "19090",
 
   "LoggerPath": "D:/tmp/logs/go/goserver-api/",
-  "LoggerLevel": "info"
+  "LoggerLevel": "info",
+
+  "FTPHost":"127.0.0.1",
+  "FTPCmdPort":21
 }
