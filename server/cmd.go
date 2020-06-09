@@ -190,10 +190,10 @@ func (cmd commandMlsd) RequireAuth() bool {
 }
 func (cmd commandMlsd) Execute(conn *Conn, param string) {
 	//自定义实现，根据path获取当前目录下列表
-	path := conn.buildPath(parseListParam(param))
+	pwd := conn.buildPath(parseListParam(param))
 
 	//todo 根据path获取当前目录下列表
-	conn.logger.Print(conn.sessionID, path)
+	conn.logger.Print(conn.sessionID, pwd)
 
 	//获取操作对象
 	tClient, tTransport := client.Connect()
@@ -207,7 +207,7 @@ func (cmd commandMlsd) Execute(conn *Conn, param string) {
 	//	fmt.Print(auth)
 	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, path)
+	res, err := tClient.Lists(ctx, conn.token, pwd)
 	if err != nil {
 		//todo 发生错误
 	} else {
@@ -245,10 +245,10 @@ func (cmd commandList) RequireAuth() bool {
 }
 func (cmd commandList) Execute(conn *Conn, param string) {
 	//自定义实现，根据path获取当前目录下列表
-	path := conn.buildPath(parseListParam(param))
+	pwd := conn.buildPath(parseListParam(param))
 
 	//todo 根据path获取当前目录下列表
-	conn.logger.Print(conn.sessionID, path)
+	conn.logger.Print(conn.sessionID, pwd)
 
 	//获取操作对象
 	tClient, tTransport := client.Connect()
@@ -262,7 +262,7 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	//	fmt.Print(auth)
 	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, path)
+	res, err := tClient.Lists(ctx, conn.token, pwd)
 	if err != nil {
 		//todo 发生错误
 	} else {
@@ -345,10 +345,10 @@ func (cmd commandNlst) RequireAuth() bool {
 func (cmd commandNlst) Execute(conn *Conn, param string) {
 
 	//自定义实现，根据path调用后台API获取FileNames
-	path := conn.buildPath(parseListParam(param))
+	pwd := conn.buildPath(parseListParam(param))
 
 	//todo 根据path调用后台API获取FileNames
-	conn.logger.Print(conn.sessionID, path)
+	conn.logger.Print(conn.sessionID, pwd)
 
 	//获取操作对象
 	tClient, tTransport := client.Connect()
@@ -362,7 +362,7 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 	//	fmt.Print(auth)
 	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, path)
+	res, err := tClient.Lists(ctx, conn.token, pwd)
 	if err != nil {
 		//todo 发生错误
 	} else {
