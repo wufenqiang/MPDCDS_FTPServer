@@ -664,16 +664,15 @@ type MPDCDS_BackendService interface { //
 	//  - Token
 	//  - Pwd
 	Lists(ctx context.Context, token string, pwd string) (r *FileDirInfo, err error)
-	// 文件信息
+	// 判断当前用户是否有权限访问该目录
 	// 1:token
-	// 2:pwd   当前目录地址
-	// 3:path  文件名
-	// 返回值：url size time name
+	// 2:abspath   当前目录绝对路径
+	// 返回值  true/false
 	//
 	// Parameters:
-	//  - Pwd
-	//  - Path
-	File(ctx context.Context, pwd string, path string) (r *FileInfo, err error)
+	//  - Token
+	//  - Abspath
+	VerifyDir(ctx context.Context, token string, abspath string) (r bool, err error)
 }
 
 //
@@ -744,21 +743,20 @@ func (p *MPDCDS_BackendServiceClient) Lists(ctx context.Context, token string, p
 	return _result8.GetSuccess(), nil
 }
 
-// 文件信息
+// 判断当前用户是否有权限访问该目录
 // 1:token
-// 2:pwd   当前目录地址
-// 3:path  文件名
-// 返回值：url size time name
+// 2:abspath   当前目录绝对路径
+// 返回值  true/false
 //
 // Parameters:
-//  - Pwd
-//  - Path
-func (p *MPDCDS_BackendServiceClient) File(ctx context.Context, pwd string, path string) (r *FileInfo, err error) {
-	var _args9 MPDCDS_BackendServiceFileArgs
-	_args9.Pwd = pwd
-	_args9.Path = path
-	var _result10 MPDCDS_BackendServiceFileResult
-	if err = p.Client_().Call(ctx, "file", &_args9, &_result10); err != nil {
+//  - Token
+//  - Abspath
+func (p *MPDCDS_BackendServiceClient) VerifyDir(ctx context.Context, token string, abspath string) (r bool, err error) {
+	var _args9 MPDCDS_BackendServiceVerifyDirArgs
+	_args9.Token = token
+	_args9.Abspath = abspath
+	var _result10 MPDCDS_BackendServiceVerifyDirResult
+	if err = p.Client_().Call(ctx, "verifyDir", &_args9, &_result10); err != nil {
 		return
 	}
 	return _result10.GetSuccess(), nil
@@ -787,7 +785,7 @@ func NewMPDCDS_BackendServiceProcessor(handler MPDCDS_BackendService) *MPDCDS_Ba
 	self11 := &MPDCDS_BackendServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
 	self11.processorMap["auth"] = &mPDCDS_BackendServiceProcessorAuth{handler: handler}
 	self11.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
-	self11.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
+	self11.processorMap["verifyDir"] = &mPDCDS_BackendServiceProcessorVerifyDir{handler: handler}
 	return self11
 }
 
@@ -906,16 +904,16 @@ func (p *mPDCDS_BackendServiceProcessorLists) Process(ctx context.Context, seqId
 	return true, err
 }
 
-type mPDCDS_BackendServiceProcessorFile struct {
+type mPDCDS_BackendServiceProcessorVerifyDir struct {
 	handler MPDCDS_BackendService
 }
 
-func (p *mPDCDS_BackendServiceProcessorFile) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := MPDCDS_BackendServiceFileArgs{}
+func (p *mPDCDS_BackendServiceProcessorVerifyDir) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := MPDCDS_BackendServiceVerifyDirArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("file", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("verifyDir", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -923,20 +921,20 @@ func (p *mPDCDS_BackendServiceProcessorFile) Process(ctx context.Context, seqId 
 	}
 
 	iprot.ReadMessageEnd()
-	result := MPDCDS_BackendServiceFileResult{}
-	var retval *FileInfo
+	result := MPDCDS_BackendServiceVerifyDirResult{}
+	var retval bool
 	var err2 error
-	if retval, err2 = p.handler.File(ctx, args.Pwd, args.Path); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing file: "+err2.Error())
-		oprot.WriteMessageBegin("file", thrift.EXCEPTION, seqId)
+	if retval, err2 = p.handler.VerifyDir(ctx, args.Token, args.Abspath); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing verifyDir: "+err2.Error())
+		oprot.WriteMessageBegin("verifyDir", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
 		return true, err2
 	} else {
-		result.Success = retval
+		result.Success = &retval
 	}
-	if err2 = oprot.WriteMessageBegin("file", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("verifyDir", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1455,25 +1453,25 @@ func (p *MPDCDS_BackendServiceListsResult) String() string {
 }
 
 // Attributes:
-//  - Pwd
-//  - Path
-type MPDCDS_BackendServiceFileArgs struct {
-	Pwd  string `thrift:"pwd,1" db:"pwd" json:"pwd"`
-	Path string `thrift:"path,2" db:"path" json:"path"`
+//  - Token
+//  - Abspath
+type MPDCDS_BackendServiceVerifyDirArgs struct {
+	Token   string `thrift:"token,1" db:"token" json:"token"`
+	Abspath string `thrift:"abspath,2" db:"abspath" json:"abspath"`
 }
 
-func NewMPDCDS_BackendServiceFileArgs() *MPDCDS_BackendServiceFileArgs {
-	return &MPDCDS_BackendServiceFileArgs{}
+func NewMPDCDS_BackendServiceVerifyDirArgs() *MPDCDS_BackendServiceVerifyDirArgs {
+	return &MPDCDS_BackendServiceVerifyDirArgs{}
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) GetPwd() string {
-	return p.Pwd
+func (p *MPDCDS_BackendServiceVerifyDirArgs) GetToken() string {
+	return p.Token
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) GetPath() string {
-	return p.Path
+func (p *MPDCDS_BackendServiceVerifyDirArgs) GetAbspath() string {
+	return p.Abspath
 }
-func (p *MPDCDS_BackendServiceFileArgs) Read(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceVerifyDirArgs) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -1522,26 +1520,26 @@ func (p *MPDCDS_BackendServiceFileArgs) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) ReadField1(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceVerifyDirArgs) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 1: ", err)
 	} else {
-		p.Pwd = v
+		p.Token = v
 	}
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) ReadField2(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceVerifyDirArgs) ReadField2(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 2: ", err)
 	} else {
-		p.Path = v
+		p.Abspath = v
 	}
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("file_args"); err != nil {
+func (p *MPDCDS_BackendServiceVerifyDirArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("verifyDir_args"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -1561,62 +1559,62 @@ func (p *MPDCDS_BackendServiceFileArgs) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) writeField1(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("pwd", thrift.STRING, 1); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:pwd: ", p), err)
+func (p *MPDCDS_BackendServiceVerifyDirArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("token", thrift.STRING, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:token: ", p), err)
 	}
-	if err := oprot.WriteString(string(p.Pwd)); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T.pwd (1) field write error: ", p), err)
+	if err := oprot.WriteString(string(p.Token)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.token (1) field write error: ", p), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:pwd: ", p), err)
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:token: ", p), err)
 	}
 	return err
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) writeField2(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("path", thrift.STRING, 2); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:path: ", p), err)
+func (p *MPDCDS_BackendServiceVerifyDirArgs) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("abspath", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:abspath: ", p), err)
 	}
-	if err := oprot.WriteString(string(p.Path)); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T.path (2) field write error: ", p), err)
+	if err := oprot.WriteString(string(p.Abspath)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.abspath (2) field write error: ", p), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:path: ", p), err)
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:abspath: ", p), err)
 	}
 	return err
 }
 
-func (p *MPDCDS_BackendServiceFileArgs) String() string {
+func (p *MPDCDS_BackendServiceVerifyDirArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("MPDCDS_BackendServiceFileArgs(%+v)", *p)
+	return fmt.Sprintf("MPDCDS_BackendServiceVerifyDirArgs(%+v)", *p)
 }
 
 // Attributes:
 //  - Success
-type MPDCDS_BackendServiceFileResult struct {
-	Success *FileInfo `thrift:"success,0" db:"success" json:"success,omitempty"`
+type MPDCDS_BackendServiceVerifyDirResult struct {
+	Success *bool `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
-func NewMPDCDS_BackendServiceFileResult() *MPDCDS_BackendServiceFileResult {
-	return &MPDCDS_BackendServiceFileResult{}
+func NewMPDCDS_BackendServiceVerifyDirResult() *MPDCDS_BackendServiceVerifyDirResult {
+	return &MPDCDS_BackendServiceVerifyDirResult{}
 }
 
-var MPDCDS_BackendServiceFileResult_Success_DEFAULT *FileInfo
+var MPDCDS_BackendServiceVerifyDirResult_Success_DEFAULT bool
 
-func (p *MPDCDS_BackendServiceFileResult) GetSuccess() *FileInfo {
+func (p *MPDCDS_BackendServiceVerifyDirResult) GetSuccess() bool {
 	if !p.IsSetSuccess() {
-		return MPDCDS_BackendServiceFileResult_Success_DEFAULT
+		return MPDCDS_BackendServiceVerifyDirResult_Success_DEFAULT
 	}
-	return p.Success
+	return *p.Success
 }
-func (p *MPDCDS_BackendServiceFileResult) IsSetSuccess() bool {
+func (p *MPDCDS_BackendServiceVerifyDirResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *MPDCDS_BackendServiceFileResult) Read(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceVerifyDirResult) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -1631,7 +1629,7 @@ func (p *MPDCDS_BackendServiceFileResult) Read(iprot thrift.TProtocol) error {
 		}
 		switch fieldId {
 		case 0:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.BOOL {
 				if err := p.ReadField0(iprot); err != nil {
 					return err
 				}
@@ -1655,16 +1653,17 @@ func (p *MPDCDS_BackendServiceFileResult) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileResult) ReadField0(iprot thrift.TProtocol) error {
-	p.Success = &FileInfo{}
-	if err := p.Success.Read(iprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+func (p *MPDCDS_BackendServiceVerifyDirResult) ReadField0(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadBool(); err != nil {
+		return thrift.PrependError("error reading field 0: ", err)
+	} else {
+		p.Success = &v
 	}
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileResult) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("file_result"); err != nil {
+func (p *MPDCDS_BackendServiceVerifyDirResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("verifyDir_result"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -1681,13 +1680,13 @@ func (p *MPDCDS_BackendServiceFileResult) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceFileResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *MPDCDS_BackendServiceVerifyDirResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
-		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+		if err := oprot.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
 		}
-		if err := p.Success.Write(oprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+		if err := oprot.WriteBool(bool(*p.Success)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err)
 		}
 		if err := oprot.WriteFieldEnd(); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
@@ -1696,9 +1695,9 @@ func (p *MPDCDS_BackendServiceFileResult) writeField0(oprot thrift.TProtocol) (e
 	return err
 }
 
-func (p *MPDCDS_BackendServiceFileResult) String() string {
+func (p *MPDCDS_BackendServiceVerifyDirResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("MPDCDS_BackendServiceFileResult(%+v)", *p)
+	return fmt.Sprintf("MPDCDS_BackendServiceVerifyDirResult(%+v)", *p)
 }
