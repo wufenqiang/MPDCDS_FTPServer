@@ -542,14 +542,14 @@ func (cmd commandCwd) RequireAuth() bool {
 
 //切换目录
 func (cmd commandCwd) Execute(conn *Conn, param string) {
-	path := conn.buildPath(param)
+	pwd := conn.buildPath(param)
 	token := conn.token
-	err := conn.driver.ChangeDir(path, token)
+	err := conn.driver.ChangeDir(pwd, token)
 	if err == nil {
-		conn.namePrefix = path
-		conn.writeMessage(250, "Directory changed to "+path)
+		conn.namePrefix = pwd
+		conn.writeMessage(250, "Directory changed to "+pwd)
 	} else {
-		conn.writeMessage(550, fmt.Sprint("Directory change to ", path, " failed: ", err))
+		conn.writeMessage(550, fmt.Sprint("Directory change to ", pwd, " failed: ", err))
 	}
 }
 

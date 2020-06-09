@@ -43,7 +43,8 @@ func (driver *FileDriver) realPath(path string) string {
 	/**
 	通过API获取数据的真实路径
 	*/
-	var RootPath string = "/tmp"
+	//var RootPath string = "/tmp"
+	var RootPath string = "/"
 
 	return filepath.Join(append([]string{RootPath}, paths...)...)
 }
