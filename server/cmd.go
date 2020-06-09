@@ -198,17 +198,21 @@ func (cmd commandMlsd) Execute(conn *Conn, param string) {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	auth, err := tClient.Auth(ctx, "111", "222")
-	if err != nil {
-		//todo 用户信息不合法
-
-	} else {
-		//todo 用户信息合法
-		fmt.Print(auth)
-	}
+	//auth, err := tClient.Auth(ctx, "111", "222")
+	//if err != nil {
+	//	//todo 用户信息不合法
+	//
+	//} else {
+	//	//todo 用户信息合法
+	//	fmt.Print(auth)
+	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, auth.Token, path)
-
+	res, err := tClient.Lists(ctx, conn.token, path)
+	if err != nil {
+		//todo 发生错误
+	} else {
+		//todo 未发生错误
+	}
 	//关闭tTransport
 	client.Close(tTransport)
 	fmt.Println("command nlst res", res)
@@ -249,17 +253,21 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	auth, err := tClient.Auth(ctx, "111", "222")
-	if err != nil {
-		//todo 用户信息不合法
-
-	} else {
-		//todo 用户信息合法
-		fmt.Print(auth)
-	}
+	//auth, err := tClient.Auth(ctx, "111", "222")
+	//if err != nil {
+	//	//todo 用户信息不合法
+	//
+	//} else {
+	//	//todo 用户信息合法
+	//	fmt.Print(auth)
+	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, auth.Token, path)
-
+	res, err := tClient.Lists(ctx, conn.token, path)
+	if err != nil {
+		//todo 发生错误
+	} else {
+		//todo 未发生错误
+	}
 	//关闭tTransport
 	client.Close(tTransport)
 	fmt.Println("command nlst res", res)
@@ -345,17 +353,21 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	auth, err := tClient.Auth(ctx, "111", "222")
-	if err != nil {
-		//todo 用户信息不合法
-
-	} else {
-		//todo 用户信息合法
-		fmt.Print(auth)
-	}
+	//auth, err := tClient.Auth(ctx, "111", "222")
+	//if err != nil {
+	//	//todo 用户信息不合法
+	//
+	//} else {
+	//	//todo 用户信息合法
+	//	fmt.Print(auth)
+	//}
 	//获取操作对象
-	res, err := tClient.Lists(ctx, auth.Token, path)
-
+	res, err := tClient.Lists(ctx, conn.token, path)
+	if err != nil {
+		//todo 发生错误
+	} else {
+		//todo 未发生错误
+	}
 	//关闭tTransport
 	client.Close(tTransport)
 	fmt.Println("command nlst res", res)

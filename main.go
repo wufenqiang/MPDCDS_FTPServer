@@ -18,18 +18,12 @@ import (
 func main() {
 	var (
 		//root = flag.String("root", "/tmp", "Root directory to serve")
-		//user = flag.String("user", "admin", "Username for login")
-		//pass = flag.String("pass", "123456", "Password for login")
 		port = flag.Int("port", conf.Sysconfig.FTPCmdPort, "Port")
 		host = flag.String("host", conf.Sysconfig.FTPHost, "Host")
 	)
 	flag.Parse()
-	//if *root == "" {
-	//	log.Fatalf("Please set a root to serve with -root")
-	//}
 
 	factory := &filedriver.FileDriverFactory{
-		//RootPath: *root,
 		Perm: server.NewSimplePerm("user", "group"),
 	}
 
