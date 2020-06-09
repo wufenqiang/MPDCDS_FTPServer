@@ -1,38 +1,34 @@
 package server
 
 import (
-	"crypto/subtle"
+	"MPDCDS_FTPServer/thrift/MPDCDS_BackendService"
+	"MPDCDS_FTPServer/thrift/client"
+	"context"
 )
 
 // Auth is an interface to auth your ftp user login.
 type Auth interface {
-	CheckPasswd(string, string) (bool, error)
+	CheckPasswd(string, string) (*MPDCDS_BackendService.Auth, error)
 }
 
 var (
-	_ Auth = &SimpleAuth{}
+	_Auth = &SimpleAuth{}
 )
 
 // SimpleAuth implements Auth interface to provide a memory user login auth
 type SimpleAuth struct {
-	//User     string
-	//Password string
+	User     string
+	Password string
 }
 
 // CheckPasswd will check user's password
-func (a *SimpleAuth) CheckPasswd(user, password string) (bool, error) {
+func (a *SimpleAuth) CheckPasswd(user string, password string) (*MPDCDS_BackendService.Auth, error) {
 
-	/**
-	此处需要修改调用API的认证接口,待API开发
-	*/
-	var user0 = "admin"
-	var password0 = "123456"
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	auth, err := tClient.Auth(ctx, user, password)
+	//关闭tTransport
+	client.Close(tTransport)
 
-	var flag = constantTimeEquals(user, user0) && constantTimeEquals(password, password0)
-
-	return flag, nil
-}
-
-func constantTimeEquals(a, b string) bool {
-	return len(a) == len(b) && subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
+	return auth, err
 }

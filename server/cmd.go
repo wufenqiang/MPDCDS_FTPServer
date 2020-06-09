@@ -458,13 +458,9 @@ func (cmd commandPass) RequireAuth() bool {
 }
 func (cmd commandPass) Execute(conn *Conn, password string) {
 	var user = conn.reqUser
-	// 调用MPDCDS_BackendService auth方法验证用户名和密码是否正确
-	//获取操作对象
-	tClient, tTransport := client.Connect()
-	ctx := context.Background()
-	auth, err := tClient.Auth(ctx, user, password)
-	//关闭tTransport
-	client.Close(tTransport)
+
+	var auth, err = conn.server.Auth.CheckPasswd(user, password)
+
 	if err != nil {
 		// 用户信息不合法
 		conn.writeMessage(530, "Incorrect password, not logged in")
@@ -479,7 +475,6 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 		} else {
 			conn.writeMessage(530, auth.Msg)
 		}
-
 	}
 }
 
