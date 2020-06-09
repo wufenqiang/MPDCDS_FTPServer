@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -192,38 +191,31 @@ func (cmd commandMlsd) Execute(conn *Conn, param string) {
 	//自定义实现，根据path获取当前目录下列表
 	pwd := conn.buildPath(parseListParam(param))
 
-	//todo 根据path获取当前目录下列表
-	conn.logger.Print(conn.sessionID, pwd)
-
 	//获取操作对象
 	tClient, tTransport := client.Connect()
-	ctx := context.Background()
-	//auth, err := tClient.Auth(ctx, "111", "222")
-	//if err != nil {
-	//	//todo 用户信息不合法
-	//
-	//} else {
-	//	//todo 用户信息合法
-	//	fmt.Print(auth)
-	//}
+
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, pwd)
+	res, err := tClient.Lists(context.Background(), conn.token, pwd)
 	if err != nil {
-		//todo 发生错误
-	} else {
-		//todo 未发生错误
+		conn.writeMessage(550, err.Error())
+		return
 	}
 	//关闭tTransport
-	client.Close(tTransport)
-	fmt.Println("command nlst res", res)
+	defer client.Close(tTransport)
+	fmt.Println("command mlsd res", res)
 
 	var buf bytes.Buffer
-	for i := 0; i < rand.Intn(10); i++ {
-		fmt.Fprintf(&buf, "Size=%d;", rand.Intn(500000))
-		fmt.Fprintf(&buf, "Modify=%s;", time.Now().Format("20060102150405"))
-		fmt.Fprintf(&buf, "Type=file;")
+	for _, e := range res.Data {
+		fmt.Fprintf(&buf, "Size=%s;", e["Size"])
+		toBeCharge := e["Modify"]
+		timeLayout := "2006-01-02 15:04:05"
+		loc, _ := time.LoadLocation("Local")
+		theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
+		fmt.Fprintf(&buf, "Modify=%s;", theTime.Format("20060102150405"))
+		fmt.Fprintf(&buf, "Type=%s;", e["Type"])
 		fmt.Fprintf(&buf, "Perm=r;")
-		fmt.Fprintf(&buf, "  %d.txt\r\n", rand.Intn(1000))
+		split := strings.Split(e["FileName"], "/")
+		fmt.Fprintf(&buf, "  %s\r\n", split[len(split)-1:][0])
 	}
 
 	conn.writeMessage(150, "File status okay; about to open data connection")
@@ -247,38 +239,34 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	//自定义实现，根据path获取当前目录下列表
 	pwd := conn.buildPath(parseListParam(param))
 
-	//todo 根据path获取当前目录下列表
-	conn.logger.Print(conn.sessionID, pwd)
-
 	//获取操作对象
 	tClient, tTransport := client.Connect()
-	ctx := context.Background()
-	//auth, err := tClient.Auth(ctx, "111", "222")
-	//if err != nil {
-	//	//todo 用户信息不合法
-	//
-	//} else {
-	//	//todo 用户信息合法
-	//	fmt.Print(auth)
-	//}
+
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, pwd)
+	res, err := tClient.Lists(context.Background(), conn.token, pwd)
 	if err != nil {
-		//todo 发生错误
-	} else {
-		//todo 未发生错误
+		conn.writeMessage(550, err.Error())
+		return
 	}
 	//关闭tTransport
-	client.Close(tTransport)
-	fmt.Println("command nlst res", res)
+	defer client.Close(tTransport)
 
 	var buf bytes.Buffer
-	for i := 0; i < 5; i++ {
-		fmt.Fprintf(&buf, "-rwxrwxrwx")
+	for _, e := range res.Data {
+		if e["Type"] == "dir" {
+			fmt.Fprintf(&buf, "dr--r--r--")
+		} else {
+			fmt.Fprintf(&buf, "-r--r--r--")
+		}
 		fmt.Fprintf(&buf, " 1 %s %s ", "USER", "GROUP")
-		fmt.Fprintf(&buf, lpad(strconv.FormatInt(rand.Int63n(6581321), 10), 12))
-		fmt.Fprintf(&buf, time.Now().Format(" Jan _2 15:04 "))
-		fmt.Fprintf(&buf, "%s.txt\r\n", lpad(strconv.FormatInt(rand.Int63n(200), 10), 12))
+		fmt.Fprintf(&buf, e["Size"])
+		toBeCharge := e["Modify"]
+		timeLayout := "2006-01-02 15:04:05"
+		loc, _ := time.LoadLocation("Local")
+		theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
+		fmt.Fprintf(&buf, theTime.Format(" Jan _2 15:04 "))
+		split := strings.Split(e["FileName"], "/")
+		fmt.Fprintf(&buf, "%s\r\n", split[len(split)-1:][0])
 	}
 
 	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
@@ -349,17 +337,15 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 
 	//获取操作对象
 	tClient, tTransport := client.Connect()
-	ctx := context.Background()
 
 	//获取操作对象
-	res, err := tClient.Lists(ctx, conn.token, pwd)
+	res, err := tClient.Lists(context.Background(), conn.token, pwd)
 	if err != nil {
-		//todo 发生错误
-	} else {
-		//todo 未发生错误
+		conn.writeMessage(550, err.Error())
+		return
 	}
 	//关闭tTransport
-	client.Close(tTransport)
+	defer client.Close(tTransport)
 
 	var buf bytes.Buffer
 	for _, e := range res.Data {
