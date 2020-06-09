@@ -347,20 +347,10 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 	//自定义实现，根据path调用后台API获取FileNames
 	pwd := conn.buildPath(parseListParam(param))
 
-	//todo 根据path调用后台API获取FileNames
-	conn.logger.Print(conn.sessionID, pwd)
-
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	//auth, err := tClient.Auth(ctx, "111", "222")
-	//if err != nil {
-	//	//todo 用户信息不合法
-	//
-	//} else {
-	//	//todo 用户信息合法
-	//	fmt.Print(auth)
-	//}
+
 	//获取操作对象
 	res, err := tClient.Lists(ctx, conn.token, pwd)
 	if err != nil {
@@ -370,11 +360,11 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 	}
 	//关闭tTransport
 	client.Close(tTransport)
-	fmt.Println("command nlst res", res)
 
 	var buf bytes.Buffer
-	for _, fileName := range []string{"aaa.txt", "bbb.txt"} {
-		fmt.Fprintf(&buf, "%s\r\n", fileName)
+	for _, e := range res.Data {
+		split := strings.Split(e["FileName"], "/")
+		fmt.Fprintf(&buf, "%s\r\n", split[len(split)-1:][0])
 	}
 	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
 	conn.sendOutofbandData(buf.Bytes())
