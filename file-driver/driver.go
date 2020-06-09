@@ -55,7 +55,7 @@ func (driver *FileDriver) Init(conn *server.Conn) {
 func (driver *FileDriver) ChangeDir(path string, token string) error {
 	rPath := driver.realPath(path)
 	ext := filepath.Ext(rPath)
-	logger.GetLogger().Info("token==============" + token)
+	logger.GetLogger().Info("=token=" + token)
 	if ext != "" {
 		return errors.New("Not a directory")
 	}

@@ -95,6 +95,9 @@ func getWriter(filename string) io.Writer {
 //初始化
 func init() {
 	logger := InitLog(conf.Sysconfig.LoggerPath, conf.Sysconfig.LoggerLevel)
+
+	logger.Info("Logger init......")
+
 	zapLogger = logger
 }
 
