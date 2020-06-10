@@ -86,7 +86,9 @@ func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interfac
 	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
 }
 func (pf *ProtocolFactory) GetData_file() ReturnType {
-	f, e := os.Open(pf.path)
+	head := pf.head()
+	path := strings.SplitAfter(pf.path, head+split)[1]
+	f, e := os.Open(path)
 	return ReturnType{f, e}
 }
 func (pf *ProtocolFactory) GetData_http() ReturnType {
