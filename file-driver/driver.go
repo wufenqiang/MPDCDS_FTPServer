@@ -62,17 +62,17 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	flag, err := tClient.VerifyDir(ctx, token, path)
+	dirAuth, err := tClient.DirAuth(ctx, token, path)
 	//关闭tTransport
 	client.Close(tTransport)
 	if err != nil {
 		return err
 	}
 
-	if flag {
+	if dirAuth.Status == 0 {
 		return nil
 	}
-	message := "failed: CreateFile " + path + ": The system cannot find the file specified."
+	message := dirAuth.Msg
 	return errors.New(message)
 	//rPath := driver.realPath(path)
 	//f, err := os.Lstat(rPath)
