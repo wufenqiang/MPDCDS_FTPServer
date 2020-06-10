@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
 	"time"
@@ -397,9 +398,22 @@ func (cmd commandRetr) RequireAuth() bool {
 	return true
 }
 func (cmd commandRetr) Execute(conn *Conn, param string) {
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	pwd := conn.namePrefix
+	fileInfo, err := tClient.File(ctx, conn.token, pwd, param)
+	//关闭tTransport
+	client.Close(tTransport)
+	if fileInfo.Status == 0 {
+		//获取文件真实地址
+		logger.GetLogger().Info("file_address", zap.String("file_address", fileInfo.Data["file_address"]))
+	} else {
+		//未获取到文件真实地址
+	}
+
 	//调用API,获取数据类型的根目录
 	homepath := ""
-
 	path := homepath + conn.buildPath(param)
 
 	defer func() {

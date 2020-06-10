@@ -33,8 +33,7 @@ func (driver *FileDriver) Init(conn *server.Conn) {
 	//driver.conn = conn
 }
 func (driver *FileDriver) ChangeDir(path string, token string) error {
-	rPath := driver.RealPath(path)
-	ext := filepath.Ext(rPath)
+	ext := filepath.Ext(path)
 	if ext != "" {
 		return errors.New("Not a directory")
 	}
