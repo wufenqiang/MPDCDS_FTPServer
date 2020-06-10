@@ -18,12 +18,12 @@ type FileDriver struct {
 	server.Perm
 }
 
-func (driver *FileDriver) RealPath(path string) string {
+func (driver *FileDriver) RealPath(param string, path string) string {
 	/**
 	通过API获取数据的真实路径
 	*/
 	//var RootPath string = "/tmp"
-	p := ProtocolFactory{path}
+	p := ProtocolFactory{path, param}
 	var head = p.head()
 	var thepath string = p.thePath()
 	var RootPath string = conf.Sysconfig.NetworkDisk
@@ -31,8 +31,6 @@ func (driver *FileDriver) RealPath(path string) string {
 	paths := strings.Split(thepath, "/")
 
 	protocolSplit := p.ProtocolSplit()
-
-	filepath.Join()
 
 	finalpath := head + protocolSplit + filepath.Join(append([]string{RootPath}, paths...)...)
 	return finalpath
@@ -70,8 +68,8 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 	//}
 	//return errors.New("Not a directory")
 }
-func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
-	basepath := driver.RealPath(path)
+func (driver *FileDriver) Stat(param string, path string) (server.FileInfo, error) {
+	basepath := driver.RealPath(param, path)
 	rPath, err := filepath.Abs(basepath)
 	if err != nil {
 		return nil, err
@@ -97,8 +95,8 @@ func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
 	}
 	return &FileInfo{f, mode, owner, group}, nil
 }
-func (driver *FileDriver) ListDir(path string, callback func(server.FileInfo) error) error {
-	basepath := driver.RealPath(path)
+func (driver *FileDriver) ListDir(param string, path string, callback func(server.FileInfo) error) error {
+	basepath := driver.RealPath(param, path)
 	return filepath.Walk(basepath, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -131,8 +129,8 @@ func (driver *FileDriver) ListDir(path string, callback func(server.FileInfo) er
 		return nil
 	})
 }
-func (driver *FileDriver) DeleteDir(path string) error {
-	rPath := driver.RealPath(path)
+func (driver *FileDriver) DeleteDir(param string, path string) error {
+	rPath := driver.RealPath(param, path)
 	f, err := os.Lstat(rPath)
 	if err != nil {
 		return err
@@ -142,8 +140,8 @@ func (driver *FileDriver) DeleteDir(path string) error {
 	}
 	return errors.New("Not a directory")
 }
-func (driver *FileDriver) DeleteFile(path string) error {
-	rPath := driver.RealPath(path)
+func (driver *FileDriver) DeleteFile(param string, path string) error {
+	rPath := driver.RealPath(param, path)
 	f, err := os.Lstat(rPath)
 	if err != nil {
 		return err
@@ -153,24 +151,24 @@ func (driver *FileDriver) DeleteFile(path string) error {
 	}
 	return errors.New("Not a file")
 }
-func (driver *FileDriver) Rename(fromPath string, toPath string) error {
-	oldPath := driver.RealPath(fromPath)
-	newPath := driver.RealPath(toPath)
+func (driver *FileDriver) Rename(param string, fromPath string, toPath string) error {
+	oldPath := driver.RealPath(param, fromPath)
+	newPath := driver.RealPath(param, toPath)
 	return os.Rename(oldPath, newPath)
 }
-func (driver *FileDriver) MakeDir(path string) error {
-	rPath := driver.RealPath(path)
+func (driver *FileDriver) MakeDir(param string, path string) error {
+	rPath := driver.RealPath(param, path)
 	return os.MkdirAll(rPath, os.ModePerm)
 }
-func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadCloser, error) {
+func (driver *FileDriver) GetFile(param string, path string, offset int64) (int64, io.ReadCloser, error) {
 	var rPath string
 	if strings.HasPrefix(path, "file") {
-		rPath = driver.RealPath(path)
+		rPath = driver.RealPath(param, path)
 	} else {
 		rPath = path
 	}
 
-	f, err0 := ReadFile(rPath)
+	f, err0 := ReadFile(rPath, param)
 	if err0 != nil {
 		return 0, nil, err0
 	}
@@ -188,8 +186,8 @@ func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadClos
 	}
 
 }
-func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bool) (int64, error) {
-	rPath := driver.RealPath(destPath)
+func (driver *FileDriver) PutFile(param string, destPath string, data io.Reader, appendData bool) (int64, error) {
+	rPath := driver.RealPath(param, destPath)
 	var isExist bool
 	f, err := os.Lstat(rPath)
 	if err == nil {

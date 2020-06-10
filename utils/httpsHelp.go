@@ -18,7 +18,8 @@ func HttpClient(url string) (io.ReadCloser, error) {
 
 	response, _ := client.Do(request)
 	if response.StatusCode == 200 {
-		return response.Body, nil
+		irc := response.Body
+		return irc, nil
 	} else {
 		return nil, nil
 	}

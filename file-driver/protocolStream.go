@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func ReadFile(path string) (io.ReadCloser, error) {
-	pf := ProtocolFactory{path}
+func ReadFile(path string, param string) (io.ReadCloser, error) {
+	pf := ProtocolFactory{path, param}
 	return pf.getData()
 }
 
@@ -19,7 +19,8 @@ type ReturnType struct {
 	e error
 }
 type ProtocolFactory struct {
-	path string
+	path     string
+	filename string
 }
 
 const protocolSplit = "://"
@@ -96,7 +97,7 @@ func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interfac
 	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
 }
 func (pf *ProtocolFactory) GetData_file() ReturnType {
-	path := pf.thePath()
+	path := pf.thePath() + "/" + pf.filename
 	f, e := os.Open(path)
 	return ReturnType{f, e}
 }

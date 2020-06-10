@@ -416,13 +416,13 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 		logger.GetLogger().Info("file_address", zap.String("file_address", fileInfo.Data["file_address"]))
 
 		//调用API,获取数据类型的根目录
-		var path string = fileInfo.Data["file_address"] + "/" + param
+		var path string = fileInfo.Data["file_address"]
 
 		defer func() {
 			conn.lastFilePos = 0
 			conn.appendData = false
 		}()
-		bytes, data, err := conn.driver.GetFile(path, conn.lastFilePos)
+		bytes, data, err := conn.driver.GetFile(param, path, conn.lastFilePos)
 		if err == nil {
 			defer data.Close()
 			conn.writeMessage(150, fmt.Sprintf("Data transfer starting %v bytes", bytes))
