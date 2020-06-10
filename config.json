@@ -9,5 +9,5 @@
 
   "FTPCmdPort":19095,
 
-  "NetworkDisk":"/tmp/"
+  "NetworkDisk":"G:/tmp/"
 }

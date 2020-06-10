@@ -15,6 +15,8 @@ type Driver interface {
 	// Init init
 	Init(*Conn)
 
+	RealPath(path string) string
+
 	// params  - a file path
 	// returns - a time indicating when the requested path was last modified
 	//         - an error if the file doesn't exist or the user lacks

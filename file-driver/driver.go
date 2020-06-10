@@ -18,44 +18,22 @@ type FileDriver struct {
 	server.Perm
 }
 
-type FileInfo struct {
-	os.FileInfo
-
-	mode  os.FileMode
-	owner string
-	group string
-}
-
-func (f *FileInfo) Mode() os.FileMode {
-	return f.mode
-}
-
-func (f *FileInfo) Owner() string {
-	return f.owner
-}
-
-func (f *FileInfo) Group() string {
-	return f.group
-}
-
-func (driver *FileDriver) realPath(path string) string {
-	paths := strings.Split(path, "/")
-
+func (driver *FileDriver) RealPath(path string) string {
 	/**
 	通过API获取数据的真实路径
 	*/
 	//var RootPath string = "/tmp"
 	var RootPath string = conf.Sysconfig.NetworkDisk
 
+	paths := strings.Split(path, "/")
+
 	return filepath.Join(append([]string{RootPath}, paths...)...)
 }
-
 func (driver *FileDriver) Init(conn *server.Conn) {
 	//driver.conn = conn
 }
-
 func (driver *FileDriver) ChangeDir(path string, token string) error {
-	rPath := driver.realPath(path)
+	rPath := driver.RealPath(path)
 	ext := filepath.Ext(rPath)
 	if ext != "" {
 		return errors.New("Not a directory")
@@ -85,9 +63,8 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 	//}
 	//return errors.New("Not a directory")
 }
-
 func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
-	basepath := driver.realPath(path)
+	basepath := driver.RealPath(path)
 	rPath, err := filepath.Abs(basepath)
 	if err != nil {
 		return nil, err
@@ -113,9 +90,8 @@ func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
 	}
 	return &FileInfo{f, mode, owner, group}, nil
 }
-
 func (driver *FileDriver) ListDir(path string, callback func(server.FileInfo) error) error {
-	basepath := driver.realPath(path)
+	basepath := driver.RealPath(path)
 	return filepath.Walk(basepath, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -148,9 +124,8 @@ func (driver *FileDriver) ListDir(path string, callback func(server.FileInfo) er
 		return nil
 	})
 }
-
 func (driver *FileDriver) DeleteDir(path string) error {
-	rPath := driver.realPath(path)
+	rPath := driver.RealPath(path)
 	f, err := os.Lstat(rPath)
 	if err != nil {
 		return err
@@ -160,9 +135,8 @@ func (driver *FileDriver) DeleteDir(path string) error {
 	}
 	return errors.New("Not a directory")
 }
-
 func (driver *FileDriver) DeleteFile(path string) error {
-	rPath := driver.realPath(path)
+	rPath := driver.RealPath(path)
 	f, err := os.Lstat(rPath)
 	if err != nil {
 		return err
@@ -172,20 +146,17 @@ func (driver *FileDriver) DeleteFile(path string) error {
 	}
 	return errors.New("Not a file")
 }
-
 func (driver *FileDriver) Rename(fromPath string, toPath string) error {
-	oldPath := driver.realPath(fromPath)
-	newPath := driver.realPath(toPath)
+	oldPath := driver.RealPath(fromPath)
+	newPath := driver.RealPath(toPath)
 	return os.Rename(oldPath, newPath)
 }
-
 func (driver *FileDriver) MakeDir(path string) error {
-	rPath := driver.realPath(path)
+	rPath := driver.RealPath(path)
 	return os.MkdirAll(rPath, os.ModePerm)
 }
-
 func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadCloser, error) {
-	rPath := driver.realPath(path)
+	rPath := driver.RealPath(path)
 	f, err := os.Open(rPath)
 	if err != nil {
 		return 0, nil, err
@@ -200,9 +171,8 @@ func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadClos
 
 	return info.Size(), f, nil
 }
-
 func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bool) (int64, error) {
-	rPath := driver.realPath(destPath)
+	rPath := driver.RealPath(destPath)
 	var isExist bool
 	f, err := os.Lstat(rPath)
 	if err == nil {
@@ -258,6 +228,24 @@ func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bo
 	}
 
 	return bytes, nil
+}
+
+type FileInfo struct {
+	os.FileInfo
+
+	mode  os.FileMode
+	owner string
+	group string
+}
+
+func (f *FileInfo) Mode() os.FileMode {
+	return f.mode
+}
+func (f *FileInfo) Owner() string {
+	return f.owner
+}
+func (f *FileInfo) Group() string {
+	return f.group
 }
 
 type FileDriverFactory struct {
