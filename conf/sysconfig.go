@@ -30,8 +30,9 @@ type sysconfig struct {
 	LoggerLevel string `json:"LoggerLevel"`
 
 	//ftp相关配置
-	FTPHost    string `json:FTPHost`
-	FTPCmdPort int    `json:FTPCmdPort`
+	//"FTPHost":"10.16.39.75",
+	//FTPHost    string `json:FTPHost`
+	FTPCmdPort int `json:FTPCmdPort`
 
 	//网盘根目录
 	NetworkDisk string `json:NetworkDisk`
