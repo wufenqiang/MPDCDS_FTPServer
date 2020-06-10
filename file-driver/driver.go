@@ -157,7 +157,7 @@ func (driver *FileDriver) MakeDir(path string) error {
 }
 func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadCloser, error) {
 	rPath := driver.RealPath(path)
-	f, err := os.Open(rPath)
+	f, err := ReadFile(rPath)
 	if err != nil {
 		return 0, nil, err
 	}
