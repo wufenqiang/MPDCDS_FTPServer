@@ -32,4 +32,7 @@ type sysconfig struct {
 	//ftp相关配置
 	FTPHost    string `json:FTPHost`
 	FTPCmdPort int    `json:FTPCmdPort`
+
+	//网盘根目录
+	NetworkDisk string `json:NetworkDisk`
 }

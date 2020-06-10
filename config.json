@@ -7,5 +7,7 @@
   "LoggerLevel": "info",
 
   "FTPHost":"127.0.0.1",
-  "FTPCmdPort":21
+  "FTPCmdPort":21,
+
+  "NetworkDisk":"/tmp/"
 }

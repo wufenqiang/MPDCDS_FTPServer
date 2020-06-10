@@ -1,6 +1,7 @@
 package filedriver
 
 import (
+	"MPDCDS_FTPServer/conf"
 	"MPDCDS_FTPServer/server"
 	"MPDCDS_FTPServer/thrift/client"
 	"context"
@@ -44,7 +45,7 @@ func (driver *FileDriver) realPath(path string) string {
 	通过API获取数据的真实路径
 	*/
 	//var RootPath string = "/tmp"
-	var RootPath string = "/"
+	var RootPath string = conf.Sysconfig.NetworkDisk
 
 	return filepath.Join(append([]string{RootPath}, paths...)...)
 }
