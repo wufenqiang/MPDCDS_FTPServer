@@ -1,7 +1,6 @@
 package filedriver
 
 import (
-	"MPDCDS_FTPServer/logger"
 	"os"
 	"reflect"
 
@@ -10,49 +9,48 @@ import (
 
 func ReadFile(path string) (*os.File, error) {
 	pf := ProtocolFactory{path}
-	return pf.getFile()
-}
-
-type ProtocolFactory struct {
-	path string
-}
-
-func (pf *ProtocolFactory) head() string {
-	head := strings.Split(pf.path, "://")[0]
-	if head == "" {
-		logger.GetLogger().Error(pf.path + "没有协议头")
-	}
-	return strings.ToLower(head)
-}
-func (pf *ProtocolFactory) getFile() (*os.File, error) {
-	head := pf.head()
-	rf := ToReturnType(CallMethod(pf, "GetFile_"+head))
-	return rf.getF(), rf.getE()
+	return pf.getData()
 }
 
 type ReturnType struct {
 	f *os.File
 	e error
 }
-
-func (rt ReturnType) getF() *os.File {
-	return rt.f
-}
-func (rt ReturnType) getE() error {
-	return rt.e
+type ProtocolFactory struct {
+	path string
 }
 
-func ToReturnType(i interface{}) ReturnType {
+const split = "://"
+
+func (pf *ProtocolFactory) head() string {
+	if strings.Contains(pf.path, split) {
+		head := strings.Split(pf.path, split)[0]
+		if head == "" {
+			panic(pf.path + "没有找到协议头")
+		}
+		return strings.ToLower(head)
+	} else {
+		panic(pf.path + "没有找到协议头规格信息,eg:[file://][http://]")
+	}
+}
+func (pf *ProtocolFactory) getData() (*os.File, error) {
+	head := pf.head()
+	//动态调用接口
+	i := pf.CallMethod(pf, "GetData_"+head)
+	//转换成返回结构体
+	rf := pf.ToReturnType(i)
+	return rf.f, rf.e
+}
+func (pf *ProtocolFactory) ToReturnType(i interface{}) ReturnType {
 	switch i.(type) {
 	case ReturnType:
 		return i.(ReturnType)
 	default:
-		logger.GetLogger().Error("ToReturnType类型无法匹配")
+		panic("ToReturnType类型无法匹配")
 		return ReturnType{nil, nil}
 	}
 }
-
-func CallMethod(i interface{}, methodName string) interface{} {
+func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interface{} {
 	var ptr reflect.Value
 	var value reflect.Value
 	var finalMethod reflect.Value
@@ -85,13 +83,12 @@ func CallMethod(i interface{}, methodName string) interface{} {
 		return finalMethod.Call([]reflect.Value{})[0].Interface()
 	}
 
-	// return or panic, method not found of either type
-	return ReturnType{nil, nil}
+	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
 }
-func (pf *ProtocolFactory) GetFile_file() ReturnType {
+func (pf *ProtocolFactory) GetData_file() ReturnType {
 	f, e := os.Open(pf.path)
 	return ReturnType{f, e}
 }
-func (pf *ProtocolFactory) GetFile_http() ReturnType {
+func (pf *ProtocolFactory) GetData_http() ReturnType {
 	return ReturnType{nil, nil}
 }
