@@ -1,19 +1,21 @@
 package filedriver
 
 import (
+	"MPDCDS_FTPServer/utils"
+	"io"
 	"os"
 	"reflect"
 
 	"strings"
 )
 
-func ReadFile(path string) (*os.File, error) {
+func ReadFile(path string) (io.ReadCloser, error) {
 	pf := ProtocolFactory{path}
 	return pf.getData()
 }
 
 type ReturnType struct {
-	f *os.File
+	f io.ReadCloser
 	e error
 }
 type ProtocolFactory struct {
@@ -41,7 +43,7 @@ func (pf *ProtocolFactory) thePath() string {
 	path := strings.SplitAfter(pf.path, head+protocolSplit)[1]
 	return path
 }
-func (pf *ProtocolFactory) getData() (*os.File, error) {
+func (pf *ProtocolFactory) getData() (io.ReadCloser, error) {
 	head := pf.head()
 	//动态调用接口
 	i := pf.CallMethod(pf, "GetData_"+head)
@@ -99,5 +101,10 @@ func (pf *ProtocolFactory) GetData_file() ReturnType {
 	return ReturnType{f, e}
 }
 func (pf *ProtocolFactory) GetData_http() ReturnType {
-	return ReturnType{nil, nil}
+	f, e := utils.HttpClient(pf.path)
+	return ReturnType{f, e}
+}
+func (pf *ProtocolFactory) GetData_https() ReturnType {
+	f, e := utils.HttpClient(pf.path)
+	return ReturnType{f, e}
 }

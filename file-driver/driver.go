@@ -163,20 +163,30 @@ func (driver *FileDriver) MakeDir(path string) error {
 	return os.MkdirAll(rPath, os.ModePerm)
 }
 func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadCloser, error) {
-	rPath := driver.RealPath(path)
-	f, err := ReadFile(rPath)
-	if err != nil {
-		return 0, nil, err
+	var rPath string
+	if strings.HasPrefix(path, "file") {
+		rPath = driver.RealPath(path)
+	} else {
+		rPath = path
 	}
 
-	info, err := f.Stat()
-	if err != nil {
-		return 0, nil, err
+	f, err0 := ReadFile(rPath)
+	if err0 != nil {
+		return 0, nil, err0
+	}
+	switch f.(type) {
+	case *os.File:
+		f0 := f.(*os.File)
+		info, err := f0.Stat()
+		if err != nil {
+			return 0, nil, err
+		}
+		f0.Seek(offset, os.SEEK_SET)
+		return info.Size(), f, err
+	default:
+		return 0, f, nil
 	}
 
-	f.Seek(offset, os.SEEK_SET)
-
-	return info.Size(), f, nil
 }
 func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bool) (int64, error) {
 	rPath := driver.RealPath(destPath)
