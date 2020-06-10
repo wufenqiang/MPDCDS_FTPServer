@@ -442,11 +442,12 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 		conn.writeMessage(530, "Incorrect password, not logged in")
 	} else {
 		// 用户信息合法
-		logger.GetLogger().Info("=token=" + auth.Token)
+
 		if auth.Status == 0 {
 			conn.user = conn.reqUser
 			conn.reqUser = ""
 			conn.token = auth.Token
+			logger.GetLogger().Info("=token=" + auth.Token)
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
 			conn.writeMessage(530, auth.Msg)
