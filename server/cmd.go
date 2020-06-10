@@ -416,7 +416,7 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 		logger.GetLogger().Info("file_address", zap.String("file_address", fileInfo.Data["file_address"]))
 
 		//调用API,获取数据类型的根目录
-		var path string = fileInfo.Data["file_address"]
+		var path string = fileInfo.Data["file_address"] + "/" + param
 
 		defer func() {
 			conn.lastFilePos = 0

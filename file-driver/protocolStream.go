@@ -20,11 +20,14 @@ type ProtocolFactory struct {
 	path string
 }
 
-const split = "://"
+const protocolSplit = "://"
 
+func (pf *ProtocolFactory) ProtocolSplit() string {
+	return protocolSplit
+}
 func (pf *ProtocolFactory) head() string {
-	if strings.Contains(pf.path, split) {
-		head := strings.Split(pf.path, split)[0]
+	if strings.Contains(pf.path, protocolSplit) {
+		head := strings.Split(pf.path, protocolSplit)[0]
 		if head == "" {
 			panic(pf.path + "没有找到协议头")
 		}
@@ -32,6 +35,11 @@ func (pf *ProtocolFactory) head() string {
 	} else {
 		panic(pf.path + "没有找到协议头规格信息,eg:[file://][http://]")
 	}
+}
+func (pf *ProtocolFactory) thePath() string {
+	head := pf.head()
+	path := strings.SplitAfter(pf.path, head+protocolSplit)[1]
+	return path
 }
 func (pf *ProtocolFactory) getData() (*os.File, error) {
 	head := pf.head()
@@ -86,8 +94,7 @@ func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interfac
 	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
 }
 func (pf *ProtocolFactory) GetData_file() ReturnType {
-	head := pf.head()
-	path := strings.SplitAfter(pf.path, head+split)[1]
+	path := pf.thePath()
 	f, e := os.Open(path)
 	return ReturnType{f, e}
 }

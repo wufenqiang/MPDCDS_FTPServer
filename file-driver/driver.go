@@ -23,11 +23,19 @@ func (driver *FileDriver) RealPath(path string) string {
 	通过API获取数据的真实路径
 	*/
 	//var RootPath string = "/tmp"
+	p := ProtocolFactory{path}
+	var head = p.head()
+	var thepath string = p.thePath()
 	var RootPath string = conf.Sysconfig.NetworkDisk
 
-	paths := strings.Split(path, "/")
+	paths := strings.Split(thepath, "/")
 
-	return filepath.Join(append([]string{RootPath}, paths...)...)
+	protocolSplit := p.ProtocolSplit()
+
+	filepath.Join()
+
+	finalpath := head + protocolSplit + filepath.Join(append([]string{RootPath}, paths...)...)
+	return finalpath
 }
 func (driver *FileDriver) Init(conn *server.Conn) {
 	//driver.conn = conn
