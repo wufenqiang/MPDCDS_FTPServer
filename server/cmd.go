@@ -81,7 +81,7 @@ var (
 		//"RMD":  commandRmd{},
 		//"XRMD": commandRmd{},
 		//
-		//"REST": commandRest{},
+		"REST": commandRest{},
 		//
 
 		//
@@ -1047,32 +1047,36 @@ func (cmd commandQuit) Execute(conn *Conn, param string) {
 // commandRetr responds to the RETR FTP command. It allows the client to
 // download a file.
 
-//type commandRest struct{}
+type commandRest struct{}
+
 //
-//func (cmd commandRest) IsExtend() bool {
-//	return false
-//}
+func (cmd commandRest) IsExtend() bool {
+	return false
+}
+
 //
-//func (cmd commandRest) RequireParam() bool {
-//	return true
-//}
+func (cmd commandRest) RequireParam() bool {
+	return true
+}
+
 //
-//func (cmd commandRest) RequireAuth() bool {
-//	return true
-//}
+func (cmd commandRest) RequireAuth() bool {
+	return true
+}
+
 //
-//func (cmd commandRest) Execute(conn *Conn, param string) {
-//	var err error
-//	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)
-//	if err != nil {
-//		conn.writeMessage(551, "File not available")
-//		return
-//	}
-//
-//	conn.appendData = true
-//
-//	conn.writeMessage(350, fmt.Sprint("Start transfer from ", conn.lastFilePos))
-//}
+func (cmd commandRest) Execute(conn *Conn, param string) {
+	var err error
+	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)
+	if err != nil {
+		conn.writeMessage(551, "File not available")
+		return
+	}
+
+	conn.appendData = true
+
+	conn.writeMessage(350, fmt.Sprint("Start transfer from ", conn.lastFilePos))
+}
 
 // commandRnfr responds to the RNFR FTP command. It's the first of two commands
 // required for a client to rename a file.
