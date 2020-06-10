@@ -1,9 +1,9 @@
 package filedriver
 
 import (
-	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/server"
-	"container/list"
+	"MPDCDS_FTPServer/thrift/client"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -56,43 +56,23 @@ func (driver *FileDriver) Init(conn *server.Conn) {
 func (driver *FileDriver) ChangeDir(path string, token string) error {
 	rPath := driver.realPath(path)
 	ext := filepath.Ext(rPath)
-	logger.GetLogger().Info("=token=" + token)
 	if ext != "" {
 		return errors.New("Not a directory")
 	}
-	//判断改路径是否存在，调用API服务接
-	dirList := list.New()
-	dirList.PushBack("/tmp/test/mm")
-	dirList.PushBack("/tmp/test/a/b/c")
-	flag := false
-	for p := dirList.Front(); p != nil; p = p.Next() {
-		dir := p.Value
-		dirStr := dir.(string)
-		dirs := strings.Split(dirStr, "/")
-		newDir := ""
-		for i := 0; i < len(dirs); i++ {
-			newDir += dirs[i] + "\\"
-			//newRealPath :=filepath.FromSlash(newDir)
-			newRealPath := ""
-			if i > 0 {
-				newRealPath = newDir[0 : len(newDir)-1]
-			} else {
-				newRealPath = newDir
-			}
-			//flag=strings.Contains(newRealPath, rPath)
-			if strings.EqualFold(newRealPath, rPath) {
-				flag = true
-				break
-			}
-		}
-		if flag {
-			break
-		}
+	//获取操作对象
+	tClient, tTransport := client.Connect()
+	ctx := context.Background()
+	flag, err := tClient.VerifyDir(ctx, token, path)
+	//关闭tTransport
+	client.Close(tTransport)
+	if err != nil {
+		return err
 	}
+
 	if flag {
 		return nil
 	}
-	message := "failed: CreateFile " + rPath + ": The system cannot find the file specified."
+	message := "failed: CreateFile " + path + ": The system cannot find the file specified."
 	return errors.New(message)
 	//rPath := driver.realPath(path)
 	//f, err := os.Lstat(rPath)
