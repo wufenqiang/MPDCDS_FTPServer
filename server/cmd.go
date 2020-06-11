@@ -403,7 +403,23 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
 	pwd := conn.namePrefix
-	fileInfo, err0 := tClient.File(ctx, conn.token, pwd, param)
+	//pwd := conn.buildPath(param)
+	//param以/目录打头
+	flag := strings.HasPrefix(param, "/")
+	path := ""
+	if flag {
+		path = param
+	} else {
+		path = pwd + "/" + param
+	}
+	a := strings.LastIndex(path, "/")
+	rs := []rune(path)
+	newPath := string(rs[0:a])
+	newFileName := string(rs[a+1 : len(path)])
+	newPathLog := zap.String("newPath", newPath)
+	newFileNameLog := zap.String("newFileName", newFileName)
+	logger.GetLogger().Info("newPath,newFileName", newPathLog, newFileNameLog)
+	fileInfo, err0 := tClient.File(ctx, conn.token, newPath, newFileName)
 	//关闭tTransport
 	client.Close(tTransport)
 
@@ -437,9 +453,8 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 
 	} else {
 		//未获取到文件真实地址
-		conn.writeMessage(551, "File not available")
+		conn.writeMessage(551, fileInfo.Msg)
 	}
-
 }
 
 //认证密码
