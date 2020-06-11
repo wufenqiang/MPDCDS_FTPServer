@@ -1,6 +1,7 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/logger"
 	"bufio"
 	"crypto/rand"
 	"crypto/sha256"
@@ -26,19 +27,19 @@ type Conn struct {
 	controlWriter *bufio.Writer
 	dataConn      DataSocket
 	driver        Driver
-	logger        Logger
-	server        *Server
-	tlsConfig     *tls.Config
-	sessionID     string
-	namePrefix    string
-	reqUser       string
-	token         string
-	user          string
-	renameFrom    string
-	lastFilePos   int64
-	appendData    bool
-	closed        bool
-	tls           bool
+	//logger        *zap.Logger
+	server      *Server
+	tlsConfig   *tls.Config
+	sessionID   string
+	namePrefix  string
+	reqUser     string
+	token       string
+	user        string
+	renameFrom  string
+	lastFilePos int64
+	appendData  bool
+	closed      bool
+	tls         bool
 }
 
 func (conn *Conn) LoginUser() string {
@@ -108,7 +109,8 @@ func newSessionID() string {
 // goroutine, so use this channel to be notified when the connection can be
 // cleaned up.
 func (conn *Conn) Serve() {
-	conn.logger.Print(conn.sessionID, "Connection Established")
+	//conn.logger.Print(conn.sessionID, "Connection Established")
+	logger.GetLogger().Info(conn.sessionID + " Connection Established")
 	// send welcome
 	conn.writeMessage(220, conn.server.WelcomeMessage)
 	// read commands
@@ -116,7 +118,8 @@ func (conn *Conn) Serve() {
 		line, err := conn.controlReader.ReadString('\n')
 		if err != nil {
 			if err != io.EOF {
-				conn.logger.Print(conn.sessionID, fmt.Sprint("read error:", err))
+				//conn.logger.Print(conn.sessionID, fmt.Sprint("read error:", err))
+				logger.GetLogger().Error(conn.sessionID + ",read error:" + err.Error())
 			}
 
 			break
@@ -129,7 +132,8 @@ func (conn *Conn) Serve() {
 		}
 	}
 	conn.Close()
-	conn.logger.Print(conn.sessionID, "Connection Terminated")
+	//conn.logger.Print(conn.sessionID, "Connection Terminated")
+	logger.GetLogger().Info(conn.sessionID + " Connection Terminated")
 }
 
 // Close will manually close this connection, even if the client isn't ready.
@@ -143,7 +147,8 @@ func (conn *Conn) Close() {
 }
 
 func (conn *Conn) upgradeToTLS() error {
-	conn.logger.Print(conn.sessionID, "Upgrading connectiion to TLS")
+	//conn.logger.Print(conn.sessionID, "Upgrading connectiion to TLS")
+	logger.GetLogger().Info(conn.sessionID + " Upgrading connectiion to TLS")
 	tlsConn := tls.Server(conn.conn, conn.tlsConfig)
 	err := tlsConn.Handshake()
 	if err == nil {
@@ -159,7 +164,8 @@ func (conn *Conn) upgradeToTLS() error {
 // appropriate response.
 func (conn *Conn) receiveLine(line string) {
 	command, param := conn.parseLine(line)
-	conn.logger.PrintCommand(conn.sessionID, command, param)
+	//conn.logger.PrintCommand(conn.sessionID, command, param)
+	conn.PrintCommand(conn.sessionID, command, param)
 	cmdObj := commands[strings.ToUpper(command)]
 	if cmdObj == nil {
 		conn.writeMessage(500, "Command not found")
@@ -184,7 +190,8 @@ func (conn *Conn) parseLine(line string) (string, string) {
 
 // writeMessage will send a standard FTP response back to the client.
 func (conn *Conn) writeMessage(code int, message string) (wrote int, err error) {
-	conn.logger.PrintResponse(conn.sessionID, code, message)
+	//conn.logger.PrintResponse(conn.sessionID, code, message)
+	conn.PrintResponse(conn.sessionID, code, message)
 	line := fmt.Sprintf("%d %s\r\n", code, message)
 	wrote, err = conn.controlWriter.WriteString(line)
 	conn.controlWriter.Flush()
@@ -193,7 +200,8 @@ func (conn *Conn) writeMessage(code int, message string) (wrote int, err error) 
 
 // writeMessage will send a standard FTP response back to the client.
 func (conn *Conn) writeMessageMultiline(code int, message string) (wrote int, err error) {
-	conn.logger.PrintResponse(conn.sessionID, code, message)
+	//conn.logger.PrintResponse(conn.sessionID, code, message)
+	conn.PrintResponse(conn.sessionID, code, message)
 	line := fmt.Sprintf("%d-%s\r\n%d END\r\n", code, message, code)
 	wrote, err = conn.controlWriter.WriteString(line)
 	conn.controlWriter.Flush()
@@ -257,4 +265,15 @@ func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 	conn.dataConn = nil
 
 	return nil
+}
+
+func (conn *Conn) PrintCommand(sessionId string, command string, params string) {
+	if command == "PASS" {
+		logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + "******(隐藏)")
+	} else {
+		logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + params)
+	}
+}
+func (conn *Conn) PrintResponse(sessionId string, code int, message string) {
+	logger.GetLogger().Info(sessionId + " <<<<<< " + strconv.Itoa(code) + "," + message)
 }

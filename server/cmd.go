@@ -402,12 +402,12 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
 	pwd := conn.namePrefix
-	fileInfo, err := tClient.File(ctx, conn.token, pwd, param)
+	fileInfo, err0 := tClient.File(ctx, conn.token, pwd, param)
 	//关闭tTransport
 	client.Close(tTransport)
 
-	if err != nil {
-		logger.GetLogger().Error(err.Error())
+	if err0 != nil {
+		logger.GetLogger().Error(err0.Error())
 		conn.writeMessage(551, "Error reading file")
 	}
 
@@ -422,12 +422,12 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 			conn.lastFilePos = 0
 			conn.appendData = false
 		}()
-		bytes, data, err := conn.driver.GetFile(path, conn.lastFilePos)
-		if err == nil {
+		bytes, data, err1 := conn.driver.GetFile(path, conn.lastFilePos)
+		if err1 == nil {
 			defer data.Close()
 			conn.writeMessage(150, fmt.Sprintf("Data transfer starting %v bytes", bytes))
-			err = conn.sendOutofBandDataWriter(data)
-			if err != nil {
+			err2 := conn.sendOutofBandDataWriter(data)
+			if err2 != nil {
 				conn.writeMessage(551, "Error reading file")
 			}
 		} else {
@@ -469,7 +469,7 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 			conn.user = conn.reqUser
 			conn.reqUser = ""
 			conn.token = auth.Token
-			logger.GetLogger().Info("=token=" + auth.Token)
+			logger.GetLogger().Info("=token装载=" + auth.Token)
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
 			conn.writeMessage(530, auth.Msg)
@@ -492,8 +492,10 @@ func (cmd commandFeat) RequireAuth() bool {
 }
 
 var (
-	feats    = "Extensions supported:\n%s"
-	featCmds = " UTF8\n"
+	//feats    = "Extensions supported:\n%s"
+	//featCmds = " UTF8\n"
+	feats    = "Extensions supported:%s"
+	featCmds = " UTF8"
 )
 
 func init() {
@@ -1004,7 +1006,7 @@ func (cmd commandPasv) RequireAuth() bool {
 }
 func (cmd commandPasv) Execute(conn *Conn, param string) {
 	listenIP := conn.passiveListenIP()
-	socket, err := newPassiveSocket(listenIP, conn.PassivePort, conn.logger, conn.sessionID, conn.tlsConfig)
+	socket, err := newPassiveSocket(listenIP, conn.PassivePort, conn.sessionID, conn.tlsConfig)
 	if err != nil {
 		conn.writeMessage(425, "Data connection failed")
 		return
@@ -1039,7 +1041,7 @@ func (cmd commandPort) Execute(conn *Conn, param string) {
 	portTwo, _ := strconv.Atoi(nums[5])
 	port := (portOne * 256) + portTwo
 	host := nums[0] + "." + nums[1] + "." + nums[2] + "." + nums[3]
-	socket, err := newActiveSocket(host, port, conn.logger, conn.sessionID)
+	socket, err := newActiveSocket(host, port, conn.sessionID)
 	if err != nil {
 		conn.writeMessage(425, "Data connection failed")
 		return

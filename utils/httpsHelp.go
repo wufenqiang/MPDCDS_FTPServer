@@ -3,9 +3,10 @@ package utils
 import (
 	"io"
 	"net/http"
+	"strconv"
 )
 
-func HttpGet(url string) (io.ReadCloser, error) {
+func HttpGet(url string) (int64, io.ReadCloser, error) {
 	client := &http.Client{}
 	//request, _ := http.NewRequest("GET", "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1628265209,77028583&fm=15&gp=0.jpg", nil)
 	request, _ := http.NewRequest("GET", url, nil)
@@ -18,13 +19,18 @@ func HttpGet(url string) (io.ReadCloser, error) {
 
 	response, err0 := client.Do(request)
 	var irc io.ReadCloser = nil
-	var err error
+	var size int64 = 0
 
 	if response.StatusCode == 200 {
 		irc = response.Body
+
+		s := response.Header.Get("Content-Length")
+
+		size, err1 := strconv.ParseInt(s, 10, 64)
+
+		return size, irc, err1
 	} else {
-		err = err0
+		return size, irc, err0
 	}
 
-	return irc, err
 }

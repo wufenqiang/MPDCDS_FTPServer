@@ -1,18 +1,20 @@
 package filedriver
 
 import (
+	"github.com/pkg/errors"
 	"io"
 	"reflect"
 
 	"strings"
 )
 
-func ReadFile(path string) (io.ReadCloser, error) {
+func ReadFile(path string) (int64, io.ReadCloser, error) {
 	pf := ProtocolFactory{path}
 	return pf.getData()
 }
 
 type ReturnType struct {
+	s int64
 	f io.ReadCloser
 	e error
 }
@@ -25,29 +27,35 @@ const protocolSplit = "://"
 func (pf *ProtocolFactory) ProtocolSplit() string {
 	return protocolSplit
 }
-func (pf *ProtocolFactory) head() string {
+func (pf *ProtocolFactory) head() (head string, err error) {
 	if strings.Contains(pf.path, protocolSplit) {
 		head := strings.Split(pf.path, protocolSplit)[0]
 		if head == "" {
-			panic(pf.path + "没有找到协议头")
+			err = errors.New(pf.path + "没有找到协议头")
+		} else {
+			err = nil
 		}
-		return strings.ToLower(head)
+		head = strings.ToLower(head)
+		return head, err
 	} else {
 		panic(pf.path + "没有找到协议头规格信息,eg:[file://][http://]")
 	}
 }
-func (pf *ProtocolFactory) thePath() string {
-	head := pf.head()
-	path := strings.SplitAfter(pf.path, head+protocolSplit)[1]
-	return path
+func (pf *ProtocolFactory) thePath() (thepath string, err error) {
+	head, e0 := pf.head()
+	thepath = strings.SplitAfter(pf.path, head+protocolSplit)[1]
+	return thepath, e0
 }
-func (pf *ProtocolFactory) getData() (io.ReadCloser, error) {
-	head := pf.head()
+func (pf *ProtocolFactory) getData() (int64, io.ReadCloser, error) {
+	head, e0 := pf.head()
+	if e0 != nil {
+		return 0, nil, e0
+	}
 	//动态调用接口
-	i := pf.callMethod(pf, "GetData_"+head)
+	i := pf.callMethod(pf, head)
 	//转换成返回结构体
 	rf := pf.toReturnType(i)
-	return rf.f, rf.e
+	return rf.s, rf.f, rf.e
 }
 func (pf *ProtocolFactory) toReturnType(i interface{}) ReturnType {
 	switch i.(type) {
@@ -55,10 +63,13 @@ func (pf *ProtocolFactory) toReturnType(i interface{}) ReturnType {
 		return i.(ReturnType)
 	default:
 		panic("ToReturnType类型无法匹配")
-		return ReturnType{nil, nil}
+		return ReturnType{0, nil, nil}
 	}
 }
-func (pf *ProtocolFactory) callMethod(i interface{}, methodName string) interface{} {
+func (pf *ProtocolFactory) callMethod(i interface{}, head string) interface{} {
+	//设置搜索接口名
+	var methodName = "GetData_" + head
+
 	var ptr reflect.Value
 	var value reflect.Value
 	var finalMethod reflect.Value
@@ -91,5 +102,5 @@ func (pf *ProtocolFactory) callMethod(i interface{}, methodName string) interfac
 		return finalMethod.Call([]reflect.Value{})[0].Interface()
 	}
 
-	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
+	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + head + "]")
 }

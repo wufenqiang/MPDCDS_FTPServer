@@ -7,5 +7,6 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
+	github.com/pkg/errors v0.8.1
 	go.uber.org/zap v1.15.0
 )

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/logger"
 	"bufio"
 	"context"
 	"crypto/tls"
@@ -55,7 +56,7 @@ type ServerOpts struct {
 	WelcomeMessage string
 
 	// A logger implementation, if nil the StdLogger is used
-	Logger Logger
+	//Logger *zap.Logger
 }
 
 // Server is the root of your FTP application. You should instantiate one
@@ -64,8 +65,8 @@ type ServerOpts struct {
 // Always use the NewServer() method to create a new Server.
 type Server struct {
 	*ServerOpts
-	listenTo  string
-	logger    Logger
+	listenTo string
+	//logger    *zap.Logger
 	listener  net.Listener
 	tlsConfig *tls.Config
 	ctx       context.Context
@@ -111,10 +112,12 @@ func serverOptsWithDefaults(opts *ServerOpts) *ServerOpts {
 		newOpts.Auth = opts.Auth
 	}
 
-	newOpts.Logger = &StdLogger{}
-	if opts.Logger != nil {
-		newOpts.Logger = opts.Logger
-	}
+	//newOpts.Logger = &StdLogger{}
+	//newOpts.Logger = logger.GetLogger()
+	//
+	//if opts.Logger != nil {
+	//	newOpts.Logger = opts.Logger
+	//}
 
 	newOpts.TLS = opts.TLS
 	newOpts.KeyFile = opts.KeyFile
@@ -149,7 +152,7 @@ func NewServer(opts *ServerOpts) *Server {
 	s := new(Server)
 	s.ServerOpts = opts
 	s.listenTo = net.JoinHostPort(opts.Hostname, strconv.Itoa(opts.Port))
-	s.logger = opts.Logger
+	//s.logger = opts.Logger
 	return s
 }
 
@@ -167,7 +170,7 @@ func (server *Server) newConn(tcpConn net.Conn, driver Driver) *Conn {
 	//c.auth = server.Auth
 	c.server = server
 	c.sessionID = newSessionID()
-	c.logger = server.logger
+	//c.logger = server.logger
 	c.tlsConfig = server.tlsConfig
 
 	driver.Init(c)
@@ -224,7 +227,8 @@ func (server *Server) ListenAndServe() error {
 	server.feats = fmt.Sprintf(feats, curFeats)
 
 	sessionID := ""
-	server.logger.Printf(sessionID, "%s listening on %d", server.Name, server.Port)
+	//server.logger.Printf(sessionID, "%s listening on %d", server.Name, server.Port)
+	logger.GetLogger().Info(sessionID + " listening on " + server.Name + ":" + strconv.Itoa(server.Port))
 
 	return server.Serve(listener)
 }
@@ -244,7 +248,8 @@ func (server *Server) Serve(l net.Listener) error {
 				return ErrServerClosed
 			default:
 			}
-			server.logger.Printf(sessionID, "listening error: %v", err)
+			//server.logger.Printf(sessionID, "listening error: %v", err)
+			logger.GetLogger().Error(sessionID + "listening error:" + err.Error())
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
 				continue
 			}
@@ -252,7 +257,8 @@ func (server *Server) Serve(l net.Listener) error {
 		}
 		driver, err := server.Factory.NewDriver()
 		if err != nil {
-			server.logger.Printf(sessionID, "Error creating driver, aborting client connection: %v", err)
+			//server.logger.Printf(sessionID, "Error creating driver, aborting client connection: %v", err)
+			logger.GetLogger().Error(sessionID + " Error creating driver, aborting client connection:" + err.Error())
 			tcpConn.Close()
 		} else {
 			ftpConn := server.newConn(tcpConn, driver)

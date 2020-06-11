@@ -2,6 +2,7 @@ package filedriver
 
 import (
 	"MPDCDS_FTPServer/conf"
+	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/server"
 	"MPDCDS_FTPServer/thrift/client"
 	"context"
@@ -10,6 +11,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -24,8 +26,8 @@ func (driver *FileDriver) RealPath(path string) string {
 	*/
 	//var RootPath string = "/tmp"
 	p := ProtocolFactory{path}
-	var head = p.head()
-	var thepath string = p.thePath()
+	var head, _ = p.head()
+	var thepath, _ = p.thePath()
 	var RootPath string = conf.Sysconfig.NetworkDisk
 
 	paths := strings.Split(thepath, "/")
@@ -168,23 +170,26 @@ func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadClos
 		rPath = path
 	}
 
-	f, err0 := ReadFile(rPath)
-	if err0 != nil {
-		return 0, nil, err0
+	s, f, e0 := ReadFile(rPath)
+	if e0 != nil {
+		return s, f, e0
 	}
 	switch f.(type) {
 	case *os.File:
 		f0 := f.(*os.File)
-		info, err := f0.Stat()
-		if err != nil {
-			return 0, nil, err
+		_, e1 := f0.Stat()
+		if e1 != nil {
+			return s, f, e1
 		}
 		f0.Seek(offset, os.SEEK_SET)
-		return info.Size(), f, err
 	default:
-		return 0, f, nil
+		if offset != 0 {
+			var e2 error = errors.New("io.ReadCloser无法使用偏移量offset(" + strconv.FormatInt(offset, 10) + ")")
+			logger.GetLogger().Warn(e2.Error())
+			return s, f, e2
+		}
 	}
-
+	return s, f, e0
 }
 func (driver *FileDriver) PutFile(destPath string, data io.Reader, appendData bool) (int64, error) {
 	rPath := driver.RealPath(destPath)

@@ -1,7 +1,9 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/logger"
 	"crypto/tls"
+	"go.uber.org/zap"
 	"io"
 	"net"
 	"os"
@@ -33,28 +35,31 @@ type DataSocket interface {
 }
 
 type ftpActiveSocket struct {
-	conn   *net.TCPConn
-	host   string
-	port   int
-	logger Logger
+	conn *net.TCPConn
+	host string
+	port int
+	//logger *zap.Logger
 }
 
-func newActiveSocket(remote string, port int, logger Logger, sessionID string) (DataSocket, error) {
+func newActiveSocket(remote string, port int, sessionID string) (DataSocket, error) {
 	connectTo := net.JoinHostPort(remote, strconv.Itoa(port))
 
-	logger.Print(sessionID, "Opening active data connection to "+connectTo)
+	//logger.Print(sessionID, "Opening active data connection to "+connectTo)
+	logger.GetLogger().Info(sessionID + "Opening active data connection to " + connectTo)
 
 	raddr, err := net.ResolveTCPAddr("tcp", connectTo)
 
 	if err != nil {
-		logger.Print(sessionID, err)
+		//logger.Print(sessionID, err)
+		logger.GetLogger().Error(sessionID + ":" + err.Error())
 		return nil, err
 	}
 
 	tcpConn, err := net.DialTCP("tcp", nil, raddr)
 
 	if err != nil {
-		logger.Print(sessionID, err)
+		//logger.Print(sessionID, err)
+		logger.GetLogger().Error(sessionID + ":" + err.Error())
 		return nil, err
 	}
 
@@ -62,7 +67,7 @@ func newActiveSocket(remote string, port int, logger Logger, sessionID string) (
 	socket.conn = tcpConn
 	socket.host = remote
 	socket.port = port
-	socket.logger = logger
+	//socket.logger = logger
 
 	return socket, nil
 }
@@ -97,7 +102,7 @@ type ftpPassiveSocket struct {
 	host      string
 	ingress   chan []byte
 	egress    chan []byte
-	logger    Logger
+	logger    *zap.Logger
 	lock      sync.Mutex // protects conn and err
 	err       error
 	tlsConfig *tls.Config
@@ -129,11 +134,11 @@ func isErrorAddressAlreadyInUse(err error) bool {
 	return false
 }
 
-func newPassiveSocket(host string, port func() int, logger Logger, sessionID string, tlsConfig *tls.Config) (DataSocket, error) {
+func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig *tls.Config) (DataSocket, error) {
 	socket := new(ftpPassiveSocket)
 	socket.ingress = make(chan []byte)
 	socket.egress = make(chan []byte)
-	socket.logger = logger
+	//socket.logger = logger
 	socket.host = host
 	socket.tlsConfig = tlsConfig
 	const retries = 10
@@ -200,14 +205,16 @@ func (socket *ftpPassiveSocket) Close() error {
 func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(socket.port)))
 	if err != nil {
-		socket.logger.Print(sessionID, err)
+		//socket.logger.Print(sessionID, err)
+		socket.logger.Error(sessionID + ":" + err.Error())
 		return
 	}
 
 	var tcplistener *net.TCPListener
 	tcplistener, err = net.ListenTCP("tcp", laddr)
 	if err != nil {
-		socket.logger.Print(sessionID, err)
+		//socket.logger.Print(sessionID, err)
+		socket.logger.Error(sessionID + ":" + err.Error())
 		return
 	}
 
@@ -216,7 +223,8 @@ func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 	const acceptTimeout = 60 * time.Second
 	err = tcplistener.SetDeadline(time.Now().Add(acceptTimeout))
 	if err != nil {
-		socket.logger.Print(sessionID, err)
+		//socket.logger.Print(sessionID, err)
+		socket.logger.Error(sessionID + ":" + err.Error())
 		return
 	}
 
@@ -225,7 +233,8 @@ func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 	parts := strings.Split(add.String(), ":")
 	port, err := strconv.Atoi(parts[len(parts)-1])
 	if err != nil {
-		socket.logger.Print(sessionID, err)
+		//socket.logger.Print(sessionID, err)
+		socket.logger.Error(sessionID + ":" + err.Error())
 		return
 	}
 
