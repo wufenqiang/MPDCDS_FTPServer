@@ -408,9 +408,9 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	flag := strings.HasPrefix(param, "/")
 	path := ""
 	if flag {
-		path = param
+		path = strings.ReplaceAll(param, "\\", "/")
 	} else {
-		path = pwd + "/" + param
+		path = pwd + "/" + strings.ReplaceAll(param, "\\", "/")
 	}
 	a := strings.LastIndex(path, "/")
 	rs := []rune(path)
