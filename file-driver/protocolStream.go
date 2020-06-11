@@ -1,16 +1,14 @@
 package filedriver
 
 import (
-	"MPDCDS_FTPServer/utils"
 	"io"
-	"os"
 	"reflect"
 
 	"strings"
 )
 
-func ReadFile(path string, param string) (io.ReadCloser, error) {
-	pf := ProtocolFactory{path, param}
+func ReadFile(path string) (io.ReadCloser, error) {
+	pf := ProtocolFactory{path}
 	return pf.getData()
 }
 
@@ -19,8 +17,7 @@ type ReturnType struct {
 	e error
 }
 type ProtocolFactory struct {
-	path     string
-	filename string
+	path string
 }
 
 const protocolSplit = "://"
@@ -47,12 +44,12 @@ func (pf *ProtocolFactory) thePath() string {
 func (pf *ProtocolFactory) getData() (io.ReadCloser, error) {
 	head := pf.head()
 	//动态调用接口
-	i := pf.CallMethod(pf, "GetData_"+head)
+	i := pf.callMethod(pf, "GetData_"+head)
 	//转换成返回结构体
-	rf := pf.ToReturnType(i)
+	rf := pf.toReturnType(i)
 	return rf.f, rf.e
 }
-func (pf *ProtocolFactory) ToReturnType(i interface{}) ReturnType {
+func (pf *ProtocolFactory) toReturnType(i interface{}) ReturnType {
 	switch i.(type) {
 	case ReturnType:
 		return i.(ReturnType)
@@ -61,7 +58,7 @@ func (pf *ProtocolFactory) ToReturnType(i interface{}) ReturnType {
 		return ReturnType{nil, nil}
 	}
 }
-func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interface{} {
+func (pf *ProtocolFactory) callMethod(i interface{}, methodName string) interface{} {
 	var ptr reflect.Value
 	var value reflect.Value
 	var finalMethod reflect.Value
@@ -95,17 +92,4 @@ func (pf *ProtocolFactory) CallMethod(i interface{}, methodName string) interfac
 	}
 
 	panic(pf.path + "没有实现协议头的数据读取类[GetData_" + pf.head() + "]")
-}
-func (pf *ProtocolFactory) GetData_file() ReturnType {
-	path := pf.thePath() + "/" + pf.filename
-	f, e := os.Open(path)
-	return ReturnType{f, e}
-}
-func (pf *ProtocolFactory) GetData_http() ReturnType {
-	f, e := utils.HttpClient(pf.path)
-	return ReturnType{f, e}
-}
-func (pf *ProtocolFactory) GetData_https() ReturnType {
-	f, e := utils.HttpClient(pf.path)
-	return ReturnType{f, e}
 }

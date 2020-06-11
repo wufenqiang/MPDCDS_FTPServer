@@ -422,7 +422,7 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 			conn.lastFilePos = 0
 			conn.appendData = false
 		}()
-		bytes, data, err := conn.driver.GetFile(param, path, conn.lastFilePos)
+		bytes, data, err := conn.driver.GetFile(path, conn.lastFilePos)
 		if err == nil {
 			defer data.Close()
 			conn.writeMessage(150, fmt.Sprintf("Data transfer starting %v bytes", bytes))

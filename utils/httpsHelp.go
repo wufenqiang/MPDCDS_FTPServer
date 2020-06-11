@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func HttpClient(url string) (io.ReadCloser, error) {
+func HttpGet(url string) (io.ReadCloser, error) {
 	client := &http.Client{}
 	//request, _ := http.NewRequest("GET", "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1628265209,77028583&fm=15&gp=0.jpg", nil)
 	request, _ := http.NewRequest("GET", url, nil)
@@ -16,11 +16,15 @@ func HttpClient(url string) (io.ReadCloser, error) {
 	request.Header.Set("Cache-Control", "max-age=0")
 	request.Header.Set("Connection", "keep-alive")
 
-	response, _ := client.Do(request)
+	response, err0 := client.Do(request)
+	var irc io.ReadCloser = nil
+	var err error
+
 	if response.StatusCode == 200 {
-		irc := response.Body
-		return irc, nil
+		irc = response.Body
 	} else {
-		return nil, nil
+		err = err0
 	}
+
+	return irc, err
 }

@@ -15,13 +15,13 @@ type Driver interface {
 	// Init init
 	Init(*Conn)
 
-	RealPath(string, path string) string
+	RealPath(path string) string
 
 	// params  - a file path
 	// returns - a time indicating when the requested path was last modified
 	//         - an error if the file doesn't exist or the user lacks
 	//           permissions
-	Stat(string, string) (FileInfo, error)
+	Stat(string) (FileInfo, error)
 
 	// params  - path
 	// returns - true if the current user is permitted to change to the
@@ -31,29 +31,29 @@ type Driver interface {
 	// params  - path, function on file or subdir found
 	// returns - error
 	//           path
-	ListDir(string, string, func(FileInfo) error) error
+	ListDir(string, func(FileInfo) error) error
 
 	// params  - path
 	// returns - nil if the directory was deleted or any error encountered
-	DeleteDir(string, string) error
+	DeleteDir(string) error
 
 	// params  - path
 	// returns - nil if the file was deleted or any error encountered
-	DeleteFile(string, string) error
+	DeleteFile(string) error
 
 	// params  - from_path, to_path
 	// returns - nil if the file was renamed or any error encountered
-	Rename(string, string, string) error
+	Rename(string, string) error
 
 	// params  - path
 	// returns - nil if the new directory was created or any error encountered
-	MakeDir(string, string) error
+	MakeDir(string) error
 
 	// params  - path
 	// returns - a string containing the file data to send to the client
-	GetFile(string, string, int64) (int64, io.ReadCloser, error)
+	GetFile(string, int64) (int64, io.ReadCloser, error)
 
 	// params  - destination path, an io.Reader containing the file data
 	// returns - the number of bytes writen and the first error encountered while writing, if any.
-	PutFile(string, string, io.Reader, bool) (int64, error)
+	PutFile(string, io.Reader, bool) (int64, error)
 }
