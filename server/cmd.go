@@ -1,6 +1,7 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/conf"
 	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/thrift/client"
 	"bytes"
@@ -469,7 +470,12 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 			conn.user = conn.reqUser
 			conn.reqUser = ""
 			conn.token = auth.Token
-			logger.GetLogger().Info("=token装载=" + auth.Token)
+			if conf.Sysconfig.ShadeInLog {
+				logger.GetLogger().Info("=token装载=" + auth.Token)
+			} else {
+				logger.GetLogger().Info("=token装载=******(密文)")
+			}
+
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
 			conn.writeMessage(530, auth.Msg)

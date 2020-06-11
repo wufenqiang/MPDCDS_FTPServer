@@ -5,9 +5,11 @@
 
   "LoggerPath": "D:/tmp/logs/go/goserver-api/",
   "LoggerLevel": "info",
+  "ShadeInLog":true,
 
 
-  "FTPCmdPort":19095,
+  "FTPCmdPort":21,
 
-  "NetworkDisk":"G:/tmp/"
+
+  "NetworkDisk":"Z:/"
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"MPDCDS_FTPServer/conf"
 	"MPDCDS_FTPServer/logger"
 	"bufio"
 	"crypto/rand"
@@ -110,7 +111,12 @@ func newSessionID() string {
 // cleaned up.
 func (conn *Conn) Serve() {
 	//conn.logger.Print(conn.sessionID, "Connection Established")
-	logger.GetLogger().Info(conn.sessionID + " Connection Established")
+	if conf.Sysconfig.ShadeInLog {
+		logger.GetLogger().Info(conn.sessionID + "(" + conn.conn.RemoteAddr().String() + ") Connection Established")
+	} else {
+		logger.GetLogger().Info(conn.sessionID + " Connection Established")
+	}
+
 	// send welcome
 	conn.writeMessage(220, conn.server.WelcomeMessage)
 	// read commands
@@ -133,7 +139,12 @@ func (conn *Conn) Serve() {
 	}
 	conn.Close()
 	//conn.logger.Print(conn.sessionID, "Connection Terminated")
-	logger.GetLogger().Info(conn.sessionID + " Connection Terminated")
+	//logger.GetLogger().Info(conn.sessionID + " Connection Terminated")
+	if conf.Sysconfig.ShadeInLog {
+		logger.GetLogger().Info(conn.sessionID + "(" + conn.conn.RemoteAddr().String() + ") Connection Terminated")
+	} else {
+		logger.GetLogger().Info(conn.sessionID + " Connection Terminated")
+	}
 }
 
 // Close will manually close this connection, even if the client isn't ready.
@@ -165,7 +176,7 @@ func (conn *Conn) upgradeToTLS() error {
 func (conn *Conn) receiveLine(line string) {
 	command, param := conn.parseLine(line)
 	//conn.logger.PrintCommand(conn.sessionID, command, param)
-	conn.PrintCommand(conn.sessionID, command, param)
+	conn.PrintReceive(conn.sessionID, command, param)
 	cmdObj := commands[strings.ToUpper(command)]
 	if cmdObj == nil {
 		conn.writeMessage(500, "Command not found")
@@ -245,8 +256,14 @@ func (conn *Conn) sendOutofbandData(data []byte) {
 	if conn.dataConn != nil {
 		conn.dataConn.Write(data)
 		conn.dataConn.Close()
+
+		if conf.Sysconfig.ShadeInLog {
+			logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + ")")
+		}
+
 		conn.dataConn = nil
 	}
+
 	message := "Closing data connection, sent " + strconv.Itoa(bytes) + " bytes"
 	conn.writeMessage(226, message)
 }
@@ -267,13 +284,21 @@ func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 	return nil
 }
 
-func (conn *Conn) PrintCommand(sessionId string, command string, params string) {
-	if command == "PASS" {
-		logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + "******(隐藏)")
+func (conn *Conn) PrintReceive(sessionId string, command string, params string) {
+	if conf.Sysconfig.ShadeInLog {
+		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> " + command + " " + params)
 	} else {
-		logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + params)
+		if command == "PASS" {
+			logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + "******(隐藏)")
+		} else {
+			logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + params)
+		}
 	}
 }
 func (conn *Conn) PrintResponse(sessionId string, code int, message string) {
-	logger.GetLogger().Info(sessionId + " <<<<<< " + strconv.Itoa(code) + "," + message)
+	if conf.Sysconfig.ShadeInLog {
+		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< " + strconv.Itoa(code) + "," + message)
+	} else {
+		logger.GetLogger().Info(sessionId + " <<<<<< " + strconv.Itoa(code) + "," + message)
+	}
 }

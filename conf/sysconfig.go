@@ -29,6 +29,9 @@ type sysconfig struct {
 	LoggerPath  string `json:"LoggerPath"`
 	LoggerLevel string `json:"LoggerLevel"`
 
+	//日志中显示相关密文
+	ShadeInLog bool `json:ShadeInLog`
+
 	//ftp相关配置
 	//"FTPHost":"10.16.39.75",
 	//FTPHost    string `json:FTPHost`

@@ -45,7 +45,7 @@ func newActiveSocket(remote string, port int, sessionID string) (DataSocket, err
 	connectTo := net.JoinHostPort(remote, strconv.Itoa(port))
 
 	//logger.Print(sessionID, "Opening active data connection to "+connectTo)
-	logger.GetLogger().Info(sessionID + "Opening active data connection to " + connectTo)
+	logger.GetLogger().Info(sessionID + " Opening active data connection to " + connectTo)
 
 	raddr, err := net.ResolveTCPAddr("tcp", connectTo)
 
