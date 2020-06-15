@@ -18,6 +18,10 @@ var _ = context.Background
 var _ = reflect.DeepEqual
 var _ = bytes.Equal
 
+// thrift接口数据返回类型
+//
+//
+//
 // Attributes:
 //  - Status
 //  - Msg
@@ -781,6 +785,378 @@ func (p *FileInfo) String() string {
 	return fmt.Sprintf("FileInfo(%+v)", *p)
 }
 
+//
+// 无返回数据，只需返回状态时，使用此结构体作为标准返回类型
+//
+//
+// Attributes:
+//  - Status
+//  - Msg
+type Result_ struct {
+	Status int16  `thrift:"status,1" db:"status" json:"status"`
+	Msg    string `thrift:"msg,2" db:"msg" json:"msg"`
+}
+
+func NewResult_() *Result_ {
+	return &Result_{}
+}
+
+func (p *Result_) GetStatus() int16 {
+	return p.Status
+}
+
+func (p *Result_) GetMsg() string {
+	return p.Msg
+}
+func (p *Result_) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I16 {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *Result_) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI16(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Status = v
+	}
+	return nil
+}
+
+func (p *Result_) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 2: ", err)
+	} else {
+		p.Msg = v
+	}
+	return nil
+}
+
+func (p *Result_) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("Result"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *Result_) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("status", thrift.I16, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:status: ", p), err)
+	}
+	if err := oprot.WriteI16(int16(p.Status)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.status (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:status: ", p), err)
+	}
+	return err
+}
+
+func (p *Result_) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("msg", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:msg: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Msg)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.msg (2) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:msg: ", p), err)
+	}
+	return err
+}
+
+func (p *Result_) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("Result_(%+v)", *p)
+}
+
+// thrift接口数据接收参数类型
+// 1：access_id 基本信息表主键
+// 2：file_id   文件信息表主键
+// 3：start_time开始下载时间 yyyy-MM-dd HH:mm:ss
+// 4：end_time  结束下载时间 yyyy-MM-dd HH:mm:ss
+//
+// Attributes:
+//  - AccessID
+//  - FileID
+//  - StartTime
+//  - EndTime
+type ApiDown struct {
+	AccessID  string `thrift:"access_id,1" db:"access_id" json:"access_id"`
+	FileID    string `thrift:"file_id,2" db:"file_id" json:"file_id"`
+	StartTime string `thrift:"start_time,3" db:"start_time" json:"start_time"`
+	EndTime   string `thrift:"end_time,4" db:"end_time" json:"end_time"`
+}
+
+func NewApiDown() *ApiDown {
+	return &ApiDown{}
+}
+
+func (p *ApiDown) GetAccessID() string {
+	return p.AccessID
+}
+
+func (p *ApiDown) GetFileID() string {
+	return p.FileID
+}
+
+func (p *ApiDown) GetStartTime() string {
+	return p.StartTime
+}
+
+func (p *ApiDown) GetEndTime() string {
+	return p.EndTime
+}
+func (p *ApiDown) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField3(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 4:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField4(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ApiDown) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.AccessID = v
+	}
+	return nil
+}
+
+func (p *ApiDown) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 2: ", err)
+	} else {
+		p.FileID = v
+	}
+	return nil
+}
+
+func (p *ApiDown) ReadField3(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 3: ", err)
+	} else {
+		p.StartTime = v
+	}
+	return nil
+}
+
+func (p *ApiDown) ReadField4(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 4: ", err)
+	} else {
+		p.EndTime = v
+	}
+	return nil
+}
+
+func (p *ApiDown) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("ApiDown"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField3(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField4(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ApiDown) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("access_id", thrift.STRING, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:access_id: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.AccessID)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.access_id (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:access_id: ", p), err)
+	}
+	return err
+}
+
+func (p *ApiDown) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("file_id", thrift.STRING, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:file_id: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.FileID)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.file_id (2) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:file_id: ", p), err)
+	}
+	return err
+}
+
+func (p *ApiDown) writeField3(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("start_time", thrift.STRING, 3); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:start_time: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.StartTime)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.start_time (3) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 3:start_time: ", p), err)
+	}
+	return err
+}
+
+func (p *ApiDown) writeField4(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("end_time", thrift.STRING, 4); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:end_time: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.EndTime)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.end_time (4) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 4:end_time: ", p), err)
+	}
+	return err
+}
+
+func (p *ApiDown) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ApiDown(%+v)", *p)
+}
+
 type MPDCDS_BackendService interface { //
 	//多协议数据采集和分配系统接口服务
 
@@ -817,13 +1193,23 @@ type MPDCDS_BackendService interface { //
 	// 1:token
 	// 2:absPath   当前目录绝对路径
 	// 3:fileName  文件名称
-	// 返回值         当前文件实际地址
+	// 返回值      当前文件实际地址
 	//
 	// Parameters:
 	//  - Token
 	//  - AbsPath
 	//  - FileName
 	File(ctx context.Context, token string, absPath string, fileName string) (r *FileInfo, err error)
+	// 记录下载文件信息
+	// 1：token
+	// 2：apidown 下载文件信息
+	// 返回值      status为0正常，小于0异常
+	//
+	//
+	// Parameters:
+	//  - Token
+	//  - Apidown
+	SaveDownFileInfo(ctx context.Context, token string, apidown *ApiDown) (r *Result_, err error)
 }
 
 //
@@ -917,7 +1303,7 @@ func (p *MPDCDS_BackendServiceClient) DirAuth(ctx context.Context, token string,
 // 1:token
 // 2:absPath   当前目录绝对路径
 // 3:fileName  文件名称
-// 返回值         当前文件实际地址
+// 返回值      当前文件实际地址
 //
 // Parameters:
 //  - Token
@@ -933,6 +1319,26 @@ func (p *MPDCDS_BackendServiceClient) File(ctx context.Context, token string, ab
 		return
 	}
 	return _result12.GetSuccess(), nil
+}
+
+// 记录下载文件信息
+// 1：token
+// 2：apidown 下载文件信息
+// 返回值      status为0正常，小于0异常
+//
+//
+// Parameters:
+//  - Token
+//  - Apidown
+func (p *MPDCDS_BackendServiceClient) SaveDownFileInfo(ctx context.Context, token string, apidown *ApiDown) (r *Result_, err error) {
+	var _args13 MPDCDS_BackendServiceSaveDownFileInfoArgs
+	_args13.Token = token
+	_args13.Apidown = apidown
+	var _result14 MPDCDS_BackendServiceSaveDownFileInfoResult
+	if err = p.Client_().Call(ctx, "saveDownFileInfo", &_args13, &_result14); err != nil {
+		return
+	}
+	return _result14.GetSuccess(), nil
 }
 
 type MPDCDS_BackendServiceProcessor struct {
@@ -955,12 +1361,13 @@ func (p *MPDCDS_BackendServiceProcessor) ProcessorMap() map[string]thrift.TProce
 
 func NewMPDCDS_BackendServiceProcessor(handler MPDCDS_BackendService) *MPDCDS_BackendServiceProcessor {
 
-	self13 := &MPDCDS_BackendServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
-	self13.processorMap["auth"] = &mPDCDS_BackendServiceProcessorAuth{handler: handler}
-	self13.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
-	self13.processorMap["dirAuth"] = &mPDCDS_BackendServiceProcessorDirAuth{handler: handler}
-	self13.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
-	return self13
+	self15 := &MPDCDS_BackendServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
+	self15.processorMap["auth"] = &mPDCDS_BackendServiceProcessorAuth{handler: handler}
+	self15.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
+	self15.processorMap["dirAuth"] = &mPDCDS_BackendServiceProcessorDirAuth{handler: handler}
+	self15.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
+	self15.processorMap["saveDownFileInfo"] = &mPDCDS_BackendServiceProcessorSaveDownFileInfo{handler: handler}
+	return self15
 }
 
 func (p *MPDCDS_BackendServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -973,12 +1380,12 @@ func (p *MPDCDS_BackendServiceProcessor) Process(ctx context.Context, iprot, opr
 	}
 	iprot.Skip(thrift.STRUCT)
 	iprot.ReadMessageEnd()
-	x14 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
+	x16 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
 	oprot.WriteMessageBegin(name, thrift.EXCEPTION, seqId)
-	x14.Write(oprot)
+	x16.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Flush(ctx)
-	return false, x14
+	return false, x16
 
 }
 
@@ -1157,6 +1564,54 @@ func (p *mPDCDS_BackendServiceProcessorFile) Process(ctx context.Context, seqId 
 		result.Success = retval
 	}
 	if err2 = oprot.WriteMessageBegin("file", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
+type mPDCDS_BackendServiceProcessorSaveDownFileInfo struct {
+	handler MPDCDS_BackendService
+}
+
+func (p *mPDCDS_BackendServiceProcessorSaveDownFileInfo) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := MPDCDS_BackendServiceSaveDownFileInfoArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("saveDownFileInfo", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	result := MPDCDS_BackendServiceSaveDownFileInfoResult{}
+	var retval *Result_
+	var err2 error
+	if retval, err2 = p.handler.SaveDownFileInfo(ctx, args.Token, args.Apidown); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing saveDownFileInfo: "+err2.Error())
+		oprot.WriteMessageBegin("saveDownFileInfo", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = retval
+	}
+	if err2 = oprot.WriteMessageBegin("saveDownFileInfo", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2211,4 +2666,261 @@ func (p *MPDCDS_BackendServiceFileResult) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("MPDCDS_BackendServiceFileResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Token
+//  - Apidown
+type MPDCDS_BackendServiceSaveDownFileInfoArgs struct {
+	Token   string   `thrift:"token,1" db:"token" json:"token"`
+	Apidown *ApiDown `thrift:"apidown,2" db:"apidown" json:"apidown"`
+}
+
+func NewMPDCDS_BackendServiceSaveDownFileInfoArgs() *MPDCDS_BackendServiceSaveDownFileInfoArgs {
+	return &MPDCDS_BackendServiceSaveDownFileInfoArgs{}
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) GetToken() string {
+	return p.Token
+}
+
+var MPDCDS_BackendServiceSaveDownFileInfoArgs_Apidown_DEFAULT *ApiDown
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) GetApidown() *ApiDown {
+	if !p.IsSetApidown() {
+		return MPDCDS_BackendServiceSaveDownFileInfoArgs_Apidown_DEFAULT
+	}
+	return p.Apidown
+}
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) IsSetApidown() bool {
+	return p.Apidown != nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRUCT {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Token = v
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) ReadField2(iprot thrift.TProtocol) error {
+	p.Apidown = &ApiDown{}
+	if err := p.Apidown.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Apidown), err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("saveDownFileInfo_args"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("token", thrift.STRING, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:token: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Token)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.token (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:token: ", p), err)
+	}
+	return err
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("apidown", thrift.STRUCT, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:apidown: ", p), err)
+	}
+	if err := p.Apidown.Write(oprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Apidown), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:apidown: ", p), err)
+	}
+	return err
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownFileInfoArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+type MPDCDS_BackendServiceSaveDownFileInfoResult struct {
+	Success *Result_ `thrift:"success,0" db:"success" json:"success,omitempty"`
+}
+
+func NewMPDCDS_BackendServiceSaveDownFileInfoResult() *MPDCDS_BackendServiceSaveDownFileInfoResult {
+	return &MPDCDS_BackendServiceSaveDownFileInfoResult{}
+}
+
+var MPDCDS_BackendServiceSaveDownFileInfoResult_Success_DEFAULT *Result_
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) GetSuccess() *Result_ {
+	if !p.IsSetSuccess() {
+		return MPDCDS_BackendServiceSaveDownFileInfoResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.STRUCT {
+				if err := p.ReadField0(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) ReadField0(iprot thrift.TProtocol) error {
+	p.Success = &Result_{}
+	if err := p.Success.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("saveDownFileInfo_result"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField0(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
+		}
+		if err := p.Success.Write(oprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
+		}
+	}
+	return err
+}
+
+func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownFileInfoResult(%+v)", *p)
 }
