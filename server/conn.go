@@ -249,8 +249,9 @@ func (conn *Conn) buildPath(filename string) (fullPath string) {
 	return
 }
 
-// sendOutofbandData will send a string to the client via the currently open
-// data socket. Assumes the socket is open and ready to be used.
+// sendOutofbandData will send a string to the client via the currently open data socket. Assumes the socket is open and ready to be used.
+/**Nlst/List/Mlsd
+ */
 func (conn *Conn) sendOutofbandData(data []byte) {
 	bytes := len(data)
 	if conn.dataConn != nil {
@@ -268,6 +269,8 @@ func (conn *Conn) sendOutofbandData(data []byte) {
 	conn.writeMessage(226, message)
 }
 
+/**Retr
+ */
 func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 	conn.lastFilePos = 0
 	bytes, err := io.Copy(conn.dataConn, data)
@@ -279,26 +282,39 @@ func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 	message := "Closing data connection, sent " + strconv.Itoa(int(bytes)) + " bytes"
 	conn.writeMessage(226, message)
 	conn.dataConn.Close()
+
+	if conf.Sysconfig.ShadeInLog {
+		//println("conn.PublicIp()="+conn.PublicIp())
+		println("conn.PassivePort()=" + strconv.Itoa(conn.PassivePort()))
+		println("conn.passiveListenIP()=" + conn.passiveListenIP())
+
+		//远程连接命令端口
+		//println("conn.conn.RemoteAddr()="+conn.conn.RemoteAddr().String())
+		logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + "------>)")
+	}
+
 	conn.dataConn = nil
 
 	return nil
 }
 
 func (conn *Conn) PrintReceive(sessionId string, command string, params string) {
+	recmsg := command + " " + params
 	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> " + command + " " + params)
+		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + recmsg)
 	} else {
 		if command == "PASS" {
-			logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + "******(隐藏)")
+			logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> " + command + " " + "******(隐藏)")
 		} else {
-			logger.GetLogger().Info(sessionId + " >>>>>> " + command + " " + params)
+			logger.GetLogger().Info(sessionId + " >>>>>> " + recmsg)
 		}
 	}
 }
 func (conn *Conn) PrintResponse(sessionId string, code int, message string) {
+	resmsg := strconv.Itoa(code) + " " + message
 	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< " + strconv.Itoa(code) + "," + message)
+		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + resmsg)
 	} else {
-		logger.GetLogger().Info(sessionId + " <<<<<< " + strconv.Itoa(code) + "," + message)
+		logger.GetLogger().Info(sessionId + " <<<<<< " + resmsg)
 	}
 }

@@ -1028,6 +1028,9 @@ func (cmd commandPasv) RequireAuth() bool {
 func (cmd commandPasv) Execute(conn *Conn, param string) {
 	listenIP := conn.passiveListenIP()
 	socket, err := newPassiveSocket(listenIP, conn.PassivePort, conn.sessionID, conn.tlsConfig)
+
+	//println(conn.PassivePort)
+
 	if err != nil {
 		conn.writeMessage(425, "Data connection failed")
 		return
