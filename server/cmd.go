@@ -19,10 +19,10 @@ type Command interface {
 	RequireAuth() bool
 	Execute(*Conn, string)
 }
-
 type commandMap map[string]Command
 
 const (
+	REST = "REST"
 	NLST = "NLST"
 	LIST = "LIST"
 	MLSD = "MLSD"
@@ -83,7 +83,7 @@ var (
 		//"RMD":  commandRmd{},
 		//"XRMD": commandRmd{},
 		//
-		"REST": commandRest{},
+
 		//
 
 		//
@@ -101,6 +101,7 @@ var (
 		RETR: commandRetr{},
 		PASS: commandPass{},
 		FEAT: commandFeat{},
+		REST: commandRest{},
 		//"CLNT": {},
 
 		/**黄欣
@@ -125,6 +126,18 @@ var (
 		XCWD: commandCwd{},
 	}
 )
+var (
+	feats    = "Extensions supported:%s"
+	featCmds = " UTF8"
+)
+
+func init() {
+	for k, v := range commands {
+		if v.IsExtend() {
+			featCmds = featCmds + " " + k + "\n"
+		}
+	}
+}
 
 // commandAllo responds to the ALLO FTP command.
 //
@@ -512,20 +525,6 @@ func (cmd commandFeat) RequireAuth() bool {
 	return false
 }
 
-var (
-	//feats    = "Extensions supported:\n%s"
-	//featCmds = " UTF8\n"
-	feats    = "Extensions supported:%s"
-	featCmds = " UTF8"
-)
-
-func init() {
-	for k, v := range commands {
-		if v.IsExtend() {
-			featCmds = featCmds + " " + k + "\n"
-		}
-	}
-}
 func (cmd commandFeat) Execute(conn *Conn, param string) {
 	conn.writeMessageMultiline(211, conn.server.feats)
 }
@@ -550,6 +549,7 @@ func (cmd commandFeat) Execute(conn *Conn, param string) {
 
 // commandCwd responds to the CWD FTP command. It allows the client to change the
 // current working directory.
+// 切换目录
 type commandCwd struct{}
 
 func (cmd commandCwd) IsExtend() bool {
@@ -561,8 +561,6 @@ func (cmd commandCwd) RequireParam() bool {
 func (cmd commandCwd) RequireAuth() bool {
 	return true
 }
-
-//切换目录
 func (cmd commandCwd) Execute(conn *Conn, param string) {
 	pwd := conn.buildPath(param)
 	token := conn.token
@@ -576,7 +574,6 @@ func (cmd commandCwd) Execute(conn *Conn, param string) {
 }
 
 // commandPwd responds to the PWD FTP command.
-//
 // Tells the client what the current working directory is.
 type commandPwd struct{}
 
@@ -605,7 +602,6 @@ func (cmd commandHelp) RequireParam() bool {
 func (cmd commandHelp) RequireAuth() bool {
 	return true
 }
-
 func (cmd commandHelp) Execute(conn *Conn, param string) {
 	if param == "" {
 		mesaage := "The following commands are recognized (* ==>'s unimplemented)." + "\n"
@@ -994,15 +990,12 @@ type commandNoop struct{}
 func (cmd commandNoop) IsExtend() bool {
 	return false
 }
-
 func (cmd commandNoop) RequireParam() bool {
 	return false
 }
-
 func (cmd commandNoop) RequireAuth() bool {
 	return false
 }
-
 func (cmd commandNoop) Execute(conn *Conn, param string) {
 	conn.writeMessage(200, "OK")
 }
@@ -1029,10 +1022,8 @@ func (cmd commandPasv) Execute(conn *Conn, param string) {
 	listenIP := conn.passiveListenIP()
 	socket, err := newPassiveSocket(listenIP, conn.PassivePort, conn.sessionID, conn.tlsConfig)
 
-	//println(conn.PassivePort)
-
 	if err != nil {
-		conn.writeMessage(425, "Data connection failed")
+		conn.writeMessage(425, "Data connection failed.")
 		return
 	}
 	conn.dataConn = socket
@@ -1097,22 +1088,15 @@ func (cmd commandQuit) Execute(conn *Conn, param string) {
 
 type commandRest struct{}
 
-//
 func (cmd commandRest) IsExtend() bool {
 	return false
 }
-
-//
 func (cmd commandRest) RequireParam() bool {
 	return true
 }
-
-//
 func (cmd commandRest) RequireAuth() bool {
 	return true
 }
-
-//
 func (cmd commandRest) Execute(conn *Conn, param string) {
 	var err error
 	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)

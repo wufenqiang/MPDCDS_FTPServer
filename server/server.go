@@ -11,12 +11,16 @@ import (
 	"strconv"
 )
 
-// Version returns the library version
+/**
+Version returns the library version
+*/
 func Version() string {
 	return "0.3.0"
 }
 
-// ServerOpts contains parameters for server.NewServer()
+/**
+ServerOpts contains parameters for server.NewServer()
+*/
 type ServerOpts struct {
 	// The factory that will be used to create a new FTPDriver instance for
 	// each client connection. This is a mandatory option.
@@ -59,10 +63,11 @@ type ServerOpts struct {
 	//Logger *zap.Logger
 }
 
-// Server is the root of your FTP application. You should instantiate one
-// of these and call ListenAndServe() to start accepting client connections.
-//
-// Always use the NewServer() method to create a new Server.
+/**
+Server is the root of your FTP application. You should instantiate one
+of these and call ListenAndServe() to start accepting client connections.
+Always use the NewServer() method to create a new Server.
+*/
 type Server struct {
 	*ServerOpts
 	listenTo string
@@ -74,12 +79,15 @@ type Server struct {
 	feats     string
 }
 
-// ErrServerClosed is returned by ListenAndServe() or Serve() when a shutdown
-// was requested.
+/**
+ErrServerClosed is returned by ListenAndServe() or Serve() when a shutdown was requested.
+*/
 var ErrServerClosed = errors.New("ftp: Server closed")
 
-// serverOptsWithDefaults copies an ServerOpts struct into a new struct,
-// then adds any default values that are missing and returns the new data.
+/**
+serverOptsWithDefaults copies an ServerOpts struct into a new struct,
+then adds any default values that are missing and returns the new data.
+*/
 func serverOptsWithDefaults(opts *ServerOpts) *ServerOpts {
 	var newOpts ServerOpts
 	if opts == nil {
@@ -156,10 +164,12 @@ func NewServer(opts *ServerOpts) *Server {
 	return s
 }
 
-// NewConn constructs a new object that will handle the FTP protocol over
-// an active net.TCPConn. The TCP connection should already be open before
-// it is handed to this functions. driver is an instance of FTPDriver that
-// will handle all auth and persistence details.
+/**
+NewConn constructs a new object that will handle the FTP protocol over
+an active net.TCPConn. The TCP connection should already be open before
+it is handed to this functions. driver is an instance of FTPDriver that
+will handle all auth and persistence details.
+*/
 func (server *Server) newConn(tcpConn net.Conn, driver Driver) *Conn {
 	c := new(Conn)
 	c.namePrefix = "/"
@@ -192,14 +202,14 @@ func simpleTLSConfig(certFile, keyFile string) (*tls.Config, error) {
 	return config, nil
 }
 
-// ListenAndServe asks a new Server to begin accepting client connections. It
-// accepts no arguments - all configuration is provided via the NewServer
-// function.
-//
-// If the server fails to start for any reason, an error will be returned. Common
-// errors are trying to bind to a privileged port or something else is already
-// listening on the same port.
-//
+/**
+ListenAndServe asks a new Server to begin accepting client connections. It
+accepts no arguments - all configuration is provided via the NewServer function.
+
+If the server fails to start for any reason, an error will be returned. Common
+errors are trying to bind to a privileged port or something else is already
+listening on the same port.
+*/
 func (server *Server) ListenAndServe() error {
 	var listener net.Listener
 	var err error
@@ -233,9 +243,9 @@ func (server *Server) ListenAndServe() error {
 	return server.Serve(listener)
 }
 
-// Serve accepts connections on a given net.Listener and handles each
-// request in a new goroutine.
-//
+/**
+Serve accepts connections on a given net.Listener and handles each request in a new goroutine.
+*/
 func (server *Server) Serve(l net.Listener) error {
 	server.listener = l
 	server.ctx, server.cancel = context.WithCancel(context.Background())
@@ -267,7 +277,9 @@ func (server *Server) Serve(l net.Listener) error {
 	}
 }
 
-// Shutdown will gracefully stop a server. Already connected clients will retain their connections
+/**
+Shutdown will gracefully stop a server. Already connected clients will retain their connections
+*/
 func (server *Server) Shutdown() error {
 	if server.cancel != nil {
 		server.cancel()

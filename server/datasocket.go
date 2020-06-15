@@ -15,21 +15,18 @@ import (
 	"time"
 )
 
-// DataSocket describes a data socket is used to send non-control data between the client and server.
+/**
+DataSocket describes a data socket is used to send non-control data between the client and server.
+*/
 type DataSocket interface {
 	Host() string
-
 	Port() int
-
 	// the standard io.Reader interface
 	Read(p []byte) (n int, err error)
-
 	// the standard io.ReaderFrom interface
 	ReadFrom(r io.Reader) (int64, error)
-
 	// the standard io.Writer interface
 	Write(p []byte) (n int, err error)
-
 	// the standard io.Closer interface
 	Close() error
 }
@@ -71,46 +68,41 @@ func newActiveSocket(remote string, port int, sessionID string) (DataSocket, err
 
 	return socket, nil
 }
-
 func (socket *ftpActiveSocket) Host() string {
 	return socket.host
 }
-
 func (socket *ftpActiveSocket) Port() int {
 	return socket.port
 }
-
 func (socket *ftpActiveSocket) Read(p []byte) (n int, err error) {
 	return socket.conn.Read(p)
 }
-
 func (socket *ftpActiveSocket) ReadFrom(r io.Reader) (int64, error) {
 	return socket.conn.ReadFrom(r)
 }
-
 func (socket *ftpActiveSocket) Write(p []byte) (n int, err error) {
 	return socket.conn.Write(p)
 }
-
 func (socket *ftpActiveSocket) Close() error {
 	return socket.conn.Close()
 }
 
 type ftpPassiveSocket struct {
-	conn      net.Conn
-	port      int
-	host      string
-	ingress   chan []byte
-	egress    chan []byte
-	logger    *zap.Logger
-	lock      sync.Mutex // protects conn and err
+	conn    net.Conn
+	host    string
+	port    int
+	ingress chan []byte
+	egress  chan []byte
+	logger  *zap.Logger
+	lock    sync.Mutex
+	// protects conn and err
 	err       error
 	tlsConfig *tls.Config
 }
 
-// Detect if an error is "bind: address already in use"
-//
-// Originally from https://stackoverflow.com/a/52152912/164234
+/**
+Detect if an error is "bind: address already in use" Originally from https://stackoverflow.com/a/52152912/164234
+*/
 func isErrorAddressAlreadyInUse(err error) bool {
 	errOpError, ok := err.(*net.OpError)
 	if !ok {
@@ -133,7 +125,6 @@ func isErrorAddressAlreadyInUse(err error) bool {
 	}
 	return false
 }
-
 func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig *tls.Config) (DataSocket, error) {
 	socket := new(ftpPassiveSocket)
 	socket.ingress = make(chan []byte)
@@ -154,54 +145,6 @@ func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig 
 	}
 	return socket, err
 }
-
-func (socket *ftpPassiveSocket) Host() string {
-	return socket.host
-}
-
-func (socket *ftpPassiveSocket) Port() int {
-	return socket.port
-}
-
-func (socket *ftpPassiveSocket) Read(p []byte) (n int, err error) {
-	socket.lock.Lock()
-	defer socket.lock.Unlock()
-	if socket.err != nil {
-		return 0, socket.err
-	}
-	return socket.conn.Read(p)
-}
-
-func (socket *ftpPassiveSocket) ReadFrom(r io.Reader) (int64, error) {
-	socket.lock.Lock()
-	defer socket.lock.Unlock()
-	if socket.err != nil {
-		return 0, socket.err
-	}
-
-	// For normal TCPConn, this will use sendfile syscall; if not,
-	// it will just downgrade to normal read/write procedure
-	return io.Copy(socket.conn, r)
-}
-
-func (socket *ftpPassiveSocket) Write(p []byte) (n int, err error) {
-	socket.lock.Lock()
-	defer socket.lock.Unlock()
-	if socket.err != nil {
-		return 0, socket.err
-	}
-	return socket.conn.Write(p)
-}
-
-func (socket *ftpPassiveSocket) Close() error {
-	socket.lock.Lock()
-	defer socket.lock.Unlock()
-	if socket.conn != nil {
-		return socket.conn.Close()
-	}
-	return nil
-}
-
 func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(socket.port)))
 	if err != nil {
@@ -256,5 +199,46 @@ func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 		socket.conn = conn
 		_ = listener.Close()
 	}()
+	return nil
+}
+func (socket *ftpPassiveSocket) Host() string {
+	return socket.host
+}
+func (socket *ftpPassiveSocket) Port() int {
+	return socket.port
+}
+func (socket *ftpPassiveSocket) Read(p []byte) (n int, err error) {
+	socket.lock.Lock()
+	defer socket.lock.Unlock()
+	if socket.err != nil {
+		return 0, socket.err
+	}
+	return socket.conn.Read(p)
+}
+func (socket *ftpPassiveSocket) ReadFrom(r io.Reader) (int64, error) {
+	socket.lock.Lock()
+	defer socket.lock.Unlock()
+	if socket.err != nil {
+		return 0, socket.err
+	}
+
+	// For normal TCPConn, this will use sendfile syscall; if not,
+	// it will just downgrade to normal read/write procedure
+	return io.Copy(socket.conn, r)
+}
+func (socket *ftpPassiveSocket) Write(p []byte) (n int, err error) {
+	socket.lock.Lock()
+	defer socket.lock.Unlock()
+	if socket.err != nil {
+		return 0, socket.err
+	}
+	return socket.conn.Write(p)
+}
+func (socket *ftpPassiveSocket) Close() error {
+	socket.lock.Lock()
+	defer socket.lock.Unlock()
+	if socket.conn != nil {
+		return socket.conn.Close()
+	}
 	return nil
 }

@@ -17,8 +17,8 @@ var (
 
 // SimpleAuth implements Auth interface to provide a memory user login auth
 type SimpleAuth struct {
-	User     string
-	Password string
+	//User     string
+	//Password string
 }
 
 // CheckPasswd will check user's password

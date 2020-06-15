@@ -19,13 +19,13 @@ import (
 )
 
 func main() {
-	ip, _ := utils.ExternalIP()
 
+	ftpip, _ := utils.ExternalIP()
 	var (
 		//root = flag.String("root", "/tmp", "Root directory to serve")
 		port = flag.Int("port", conf.Sysconfig.FTPCmdPort, "Port")
 		//host = flag.String("host", conf.Sysconfig.FTPHost, "Host")
-		host = flag.String("host", ip.String(), "Host")
+		host = flag.String("host", ftpip.String(), "Host")
 	)
 	flag.Parse()
 

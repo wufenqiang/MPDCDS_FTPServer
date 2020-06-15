@@ -19,8 +19,22 @@ import (
 )
 
 const (
-	defaultWelcomeMessage = "Welcome to the Go FTP Server"
+	defaultWelcomeMessage = "Welcome to the Go MPDCDS_FTPServer"
 )
+
+/**
+returns a random 20 char string that can be used as a unique session ID
+*/
+func newSessionID() string {
+	hash := sha256.New()
+	_, err := io.CopyN(hash, rand.Reader, 50)
+	if err != nil {
+		return "????????????????????"
+	}
+	md := hash.Sum(nil)
+	mdStr := hex.EncodeToString(md)
+	return mdStr[0:20]
+}
 
 type Conn struct {
 	conn          net.Conn
@@ -92,23 +106,13 @@ func (conn *Conn) PassivePort() int {
 	return 0
 }
 
-// returns a random 20 char string that can be used as a unique session ID
-func newSessionID() string {
-	hash := sha256.New()
-	_, err := io.CopyN(hash, rand.Reader, 50)
-	if err != nil {
-		return "????????????????????"
-	}
-	md := hash.Sum(nil)
-	mdStr := hex.EncodeToString(md)
-	return mdStr[0:20]
-}
-
-// Serve starts an endless loop that reads FTP commands from the client and
-// responds appropriately. terminated is a channel that will receive a true
-// message when the connection closes. This loop will be running inside a
-// goroutine, so use this channel to be notified when the connection can be
-// cleaned up.
+/**
+Serve starts an endless loop that reads FTP commands from the client and
+responds appropriately. terminated is a channel that will receive a true
+message when the connection closes. This loop will be running inside a
+goroutine, so use this channel to be notified when the connection can be
+cleaned up.
+*/
 func (conn *Conn) Serve() {
 	//conn.logger.Print(conn.sessionID, "Connection Established")
 	if conf.Sysconfig.ShadeInLog {
@@ -147,7 +151,9 @@ func (conn *Conn) Serve() {
 	}
 }
 
-// Close will manually close this connection, even if the client isn't ready.
+/**
+Close will manually close this connection, even if the client isn't ready.
+*/
 func (conn *Conn) Close() {
 	conn.conn.Close()
 	conn.closed = true
@@ -171,8 +177,9 @@ func (conn *Conn) upgradeToTLS() error {
 	return err
 }
 
-// receiveLine accepts a single line FTP command and co-ordinates an
-// appropriate response.
+/**
+receiveLine accepts a single line FTP command and co-ordinates an appropriate response.
+*/
 func (conn *Conn) receiveLine(line string) {
 	command, param := conn.parseLine(line)
 	//conn.logger.PrintCommand(conn.sessionID, command, param)
@@ -199,7 +206,9 @@ func (conn *Conn) parseLine(line string) (string, string) {
 	return params[0], strings.TrimSpace(params[1])
 }
 
-// writeMessage will send a standard FTP response back to the client.
+/**
+writeMessage will send a standard FTP response back to the client.
+*/
 func (conn *Conn) writeMessage(code int, message string) (wrote int, err error) {
 	//conn.logger.PrintResponse(conn.sessionID, code, message)
 	conn.PrintResponse(conn.sessionID, code, message)
@@ -209,7 +218,9 @@ func (conn *Conn) writeMessage(code int, message string) (wrote int, err error) 
 	return
 }
 
-// writeMessage will send a standard FTP response back to the client.
+/**
+writeMessage will send a standard FTP response back to the client.
+*/
 func (conn *Conn) writeMessageMultiline(code int, message string) (wrote int, err error) {
 	//conn.logger.PrintResponse(conn.sessionID, code, message)
 	conn.PrintResponse(conn.sessionID, code, message)
@@ -249,9 +260,12 @@ func (conn *Conn) buildPath(filename string) (fullPath string) {
 	return
 }
 
-// sendOutofbandData will send a string to the client via the currently open data socket. Assumes the socket is open and ready to be used.
-/**Nlst/List/Mlsd
- */
+/**
+sendOutofbandData will send a string to the client via the currently open data socket. Assumes the socket is open and ready to be used.
+Nlst
+List
+Mlsd
+*/
 func (conn *Conn) sendOutofbandData(data []byte) {
 	bytes := len(data)
 	if conn.dataConn != nil {
@@ -269,8 +283,9 @@ func (conn *Conn) sendOutofbandData(data []byte) {
 	conn.writeMessage(226, message)
 }
 
-/**Retr
- */
+/**
+Retr
+*/
 func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 	conn.lastFilePos = 0
 	bytes, err := io.Copy(conn.dataConn, data)
@@ -285,8 +300,8 @@ func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 
 	if conf.Sysconfig.ShadeInLog {
 		//println("conn.PublicIp()="+conn.PublicIp())
-		println("conn.PassivePort()=" + strconv.Itoa(conn.PassivePort()))
-		println("conn.passiveListenIP()=" + conn.passiveListenIP())
+		//println("conn.PassivePort()=" + strconv.Itoa(conn.PassivePort()))
+		//println("conn.passiveListenIP()=" + conn.passiveListenIP())
 
 		//远程连接命令端口
 		//println("conn.conn.RemoteAddr()="+conn.conn.RemoteAddr().String())
