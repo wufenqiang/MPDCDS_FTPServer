@@ -940,33 +940,33 @@ func (p *Result_) String() string {
 //  - FileID
 //  - StartTime
 //  - EndTime
-type ApiDown struct {
+type ApiDownLoad struct {
 	AccessID  string `thrift:"access_id,1" db:"access_id" json:"access_id"`
 	FileID    string `thrift:"file_id,2" db:"file_id" json:"file_id"`
 	StartTime string `thrift:"start_time,3" db:"start_time" json:"start_time"`
 	EndTime   string `thrift:"end_time,4" db:"end_time" json:"end_time"`
 }
 
-func NewApiDown() *ApiDown {
-	return &ApiDown{}
+func NewApiDownLoad() *ApiDownLoad {
+	return &ApiDownLoad{}
 }
 
-func (p *ApiDown) GetAccessID() string {
+func (p *ApiDownLoad) GetAccessID() string {
 	return p.AccessID
 }
 
-func (p *ApiDown) GetFileID() string {
+func (p *ApiDownLoad) GetFileID() string {
 	return p.FileID
 }
 
-func (p *ApiDown) GetStartTime() string {
+func (p *ApiDownLoad) GetStartTime() string {
 	return p.StartTime
 }
 
-func (p *ApiDown) GetEndTime() string {
+func (p *ApiDownLoad) GetEndTime() string {
 	return p.EndTime
 }
-func (p *ApiDown) Read(iprot thrift.TProtocol) error {
+func (p *ApiDownLoad) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -1035,7 +1035,7 @@ func (p *ApiDown) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) ReadField1(iprot thrift.TProtocol) error {
+func (p *ApiDownLoad) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 1: ", err)
 	} else {
@@ -1044,7 +1044,7 @@ func (p *ApiDown) ReadField1(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) ReadField2(iprot thrift.TProtocol) error {
+func (p *ApiDownLoad) ReadField2(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 2: ", err)
 	} else {
@@ -1053,7 +1053,7 @@ func (p *ApiDown) ReadField2(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) ReadField3(iprot thrift.TProtocol) error {
+func (p *ApiDownLoad) ReadField3(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 3: ", err)
 	} else {
@@ -1062,7 +1062,7 @@ func (p *ApiDown) ReadField3(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) ReadField4(iprot thrift.TProtocol) error {
+func (p *ApiDownLoad) ReadField4(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 4: ", err)
 	} else {
@@ -1071,8 +1071,8 @@ func (p *ApiDown) ReadField4(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("ApiDown"); err != nil {
+func (p *ApiDownLoad) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("ApiDownLoad"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -1098,7 +1098,7 @@ func (p *ApiDown) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ApiDown) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *ApiDownLoad) writeField1(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("access_id", thrift.STRING, 1); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:access_id: ", p), err)
 	}
@@ -1111,7 +1111,7 @@ func (p *ApiDown) writeField1(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
-func (p *ApiDown) writeField2(oprot thrift.TProtocol) (err error) {
+func (p *ApiDownLoad) writeField2(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("file_id", thrift.STRING, 2); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:file_id: ", p), err)
 	}
@@ -1124,7 +1124,7 @@ func (p *ApiDown) writeField2(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
-func (p *ApiDown) writeField3(oprot thrift.TProtocol) (err error) {
+func (p *ApiDownLoad) writeField3(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("start_time", thrift.STRING, 3); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:start_time: ", p), err)
 	}
@@ -1137,7 +1137,7 @@ func (p *ApiDown) writeField3(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
-func (p *ApiDown) writeField4(oprot thrift.TProtocol) (err error) {
+func (p *ApiDownLoad) writeField4(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("end_time", thrift.STRING, 4); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:end_time: ", p), err)
 	}
@@ -1150,11 +1150,11 @@ func (p *ApiDown) writeField4(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
-func (p *ApiDown) String() string {
+func (p *ApiDownLoad) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ApiDown(%+v)", *p)
+	return fmt.Sprintf("ApiDownLoad(%+v)", *p)
 }
 
 type MPDCDS_BackendService interface { //
@@ -1208,8 +1208,8 @@ type MPDCDS_BackendService interface { //
 	//
 	// Parameters:
 	//  - Token
-	//  - Apidown
-	SaveDownFileInfo(ctx context.Context, token string, apidown *ApiDown) (r *Result_, err error)
+	//  - ApiDownLoad
+	SaveDownLoadFileInfo(ctx context.Context, token string, apiDownLoad *ApiDownLoad) (r *Result_, err error)
 }
 
 //
@@ -1329,13 +1329,13 @@ func (p *MPDCDS_BackendServiceClient) File(ctx context.Context, token string, ab
 //
 // Parameters:
 //  - Token
-//  - Apidown
-func (p *MPDCDS_BackendServiceClient) SaveDownFileInfo(ctx context.Context, token string, apidown *ApiDown) (r *Result_, err error) {
-	var _args13 MPDCDS_BackendServiceSaveDownFileInfoArgs
+//  - ApiDownLoad
+func (p *MPDCDS_BackendServiceClient) SaveDownLoadFileInfo(ctx context.Context, token string, apiDownLoad *ApiDownLoad) (r *Result_, err error) {
+	var _args13 MPDCDS_BackendServiceSaveDownLoadFileInfoArgs
 	_args13.Token = token
-	_args13.Apidown = apidown
-	var _result14 MPDCDS_BackendServiceSaveDownFileInfoResult
-	if err = p.Client_().Call(ctx, "saveDownFileInfo", &_args13, &_result14); err != nil {
+	_args13.ApiDownLoad = apiDownLoad
+	var _result14 MPDCDS_BackendServiceSaveDownLoadFileInfoResult
+	if err = p.Client_().Call(ctx, "saveDownLoadFileInfo", &_args13, &_result14); err != nil {
 		return
 	}
 	return _result14.GetSuccess(), nil
@@ -1366,7 +1366,7 @@ func NewMPDCDS_BackendServiceProcessor(handler MPDCDS_BackendService) *MPDCDS_Ba
 	self15.processorMap["lists"] = &mPDCDS_BackendServiceProcessorLists{handler: handler}
 	self15.processorMap["dirAuth"] = &mPDCDS_BackendServiceProcessorDirAuth{handler: handler}
 	self15.processorMap["file"] = &mPDCDS_BackendServiceProcessorFile{handler: handler}
-	self15.processorMap["saveDownFileInfo"] = &mPDCDS_BackendServiceProcessorSaveDownFileInfo{handler: handler}
+	self15.processorMap["saveDownLoadFileInfo"] = &mPDCDS_BackendServiceProcessorSaveDownLoadFileInfo{handler: handler}
 	return self15
 }
 
@@ -1581,16 +1581,16 @@ func (p *mPDCDS_BackendServiceProcessorFile) Process(ctx context.Context, seqId 
 	return true, err
 }
 
-type mPDCDS_BackendServiceProcessorSaveDownFileInfo struct {
+type mPDCDS_BackendServiceProcessorSaveDownLoadFileInfo struct {
 	handler MPDCDS_BackendService
 }
 
-func (p *mPDCDS_BackendServiceProcessorSaveDownFileInfo) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := MPDCDS_BackendServiceSaveDownFileInfoArgs{}
+func (p *mPDCDS_BackendServiceProcessorSaveDownLoadFileInfo) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := MPDCDS_BackendServiceSaveDownLoadFileInfoArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("saveDownFileInfo", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("saveDownLoadFileInfo", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1598,12 +1598,12 @@ func (p *mPDCDS_BackendServiceProcessorSaveDownFileInfo) Process(ctx context.Con
 	}
 
 	iprot.ReadMessageEnd()
-	result := MPDCDS_BackendServiceSaveDownFileInfoResult{}
+	result := MPDCDS_BackendServiceSaveDownLoadFileInfoResult{}
 	var retval *Result_
 	var err2 error
-	if retval, err2 = p.handler.SaveDownFileInfo(ctx, args.Token, args.Apidown); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing saveDownFileInfo: "+err2.Error())
-		oprot.WriteMessageBegin("saveDownFileInfo", thrift.EXCEPTION, seqId)
+	if retval, err2 = p.handler.SaveDownLoadFileInfo(ctx, args.Token, args.ApiDownLoad); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing saveDownLoadFileInfo: "+err2.Error())
+		oprot.WriteMessageBegin("saveDownLoadFileInfo", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1611,7 +1611,7 @@ func (p *mPDCDS_BackendServiceProcessorSaveDownFileInfo) Process(ctx context.Con
 	} else {
 		result.Success = retval
 	}
-	if err2 = oprot.WriteMessageBegin("saveDownFileInfo", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("saveDownLoadFileInfo", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2670,33 +2670,33 @@ func (p *MPDCDS_BackendServiceFileResult) String() string {
 
 // Attributes:
 //  - Token
-//  - Apidown
-type MPDCDS_BackendServiceSaveDownFileInfoArgs struct {
-	Token   string   `thrift:"token,1" db:"token" json:"token"`
-	Apidown *ApiDown `thrift:"apidown,2" db:"apidown" json:"apidown"`
+//  - ApiDownLoad
+type MPDCDS_BackendServiceSaveDownLoadFileInfoArgs struct {
+	Token       string       `thrift:"token,1" db:"token" json:"token"`
+	ApiDownLoad *ApiDownLoad `thrift:"apiDownLoad,2" db:"apiDownLoad" json:"apiDownLoad"`
 }
 
-func NewMPDCDS_BackendServiceSaveDownFileInfoArgs() *MPDCDS_BackendServiceSaveDownFileInfoArgs {
-	return &MPDCDS_BackendServiceSaveDownFileInfoArgs{}
+func NewMPDCDS_BackendServiceSaveDownLoadFileInfoArgs() *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs {
+	return &MPDCDS_BackendServiceSaveDownLoadFileInfoArgs{}
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) GetToken() string {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) GetToken() string {
 	return p.Token
 }
 
-var MPDCDS_BackendServiceSaveDownFileInfoArgs_Apidown_DEFAULT *ApiDown
+var MPDCDS_BackendServiceSaveDownLoadFileInfoArgs_ApiDownLoad_DEFAULT *ApiDownLoad
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) GetApidown() *ApiDown {
-	if !p.IsSetApidown() {
-		return MPDCDS_BackendServiceSaveDownFileInfoArgs_Apidown_DEFAULT
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) GetApiDownLoad() *ApiDownLoad {
+	if !p.IsSetApiDownLoad() {
+		return MPDCDS_BackendServiceSaveDownLoadFileInfoArgs_ApiDownLoad_DEFAULT
 	}
-	return p.Apidown
+	return p.ApiDownLoad
 }
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) IsSetApidown() bool {
-	return p.Apidown != nil
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) IsSetApiDownLoad() bool {
+	return p.ApiDownLoad != nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Read(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -2745,7 +2745,7 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Read(iprot thrift.TProtocol)
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) ReadField1(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return thrift.PrependError("error reading field 1: ", err)
 	} else {
@@ -2754,16 +2754,16 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) ReadField1(iprot thrift.TPro
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) ReadField2(iprot thrift.TProtocol) error {
-	p.Apidown = &ApiDown{}
-	if err := p.Apidown.Read(iprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Apidown), err)
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) ReadField2(iprot thrift.TProtocol) error {
+	p.ApiDownLoad = &ApiDownLoad{}
+	if err := p.ApiDownLoad.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ApiDownLoad), err)
 	}
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("saveDownFileInfo_args"); err != nil {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("saveDownLoadFileInfo_args"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -2783,7 +2783,7 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) Write(oprot thrift.TProtocol
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("token", thrift.STRING, 1); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:token: ", p), err)
 	}
@@ -2796,49 +2796,49 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) writeField1(oprot thrift.TPr
 	return err
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) writeField2(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("apidown", thrift.STRUCT, 2); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:apidown: ", p), err)
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("apiDownLoad", thrift.STRUCT, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:apiDownLoad: ", p), err)
 	}
-	if err := p.Apidown.Write(oprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Apidown), err)
+	if err := p.ApiDownLoad.Write(oprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ApiDownLoad), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:apidown: ", p), err)
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:apiDownLoad: ", p), err)
 	}
 	return err
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoArgs) String() string {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownFileInfoArgs(%+v)", *p)
+	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownLoadFileInfoArgs(%+v)", *p)
 }
 
 // Attributes:
 //  - Success
-type MPDCDS_BackendServiceSaveDownFileInfoResult struct {
+type MPDCDS_BackendServiceSaveDownLoadFileInfoResult struct {
 	Success *Result_ `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
-func NewMPDCDS_BackendServiceSaveDownFileInfoResult() *MPDCDS_BackendServiceSaveDownFileInfoResult {
-	return &MPDCDS_BackendServiceSaveDownFileInfoResult{}
+func NewMPDCDS_BackendServiceSaveDownLoadFileInfoResult() *MPDCDS_BackendServiceSaveDownLoadFileInfoResult {
+	return &MPDCDS_BackendServiceSaveDownLoadFileInfoResult{}
 }
 
-var MPDCDS_BackendServiceSaveDownFileInfoResult_Success_DEFAULT *Result_
+var MPDCDS_BackendServiceSaveDownLoadFileInfoResult_Success_DEFAULT *Result_
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) GetSuccess() *Result_ {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) GetSuccess() *Result_ {
 	if !p.IsSetSuccess() {
-		return MPDCDS_BackendServiceSaveDownFileInfoResult_Success_DEFAULT
+		return MPDCDS_BackendServiceSaveDownLoadFileInfoResult_Success_DEFAULT
 	}
 	return p.Success
 }
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) IsSetSuccess() bool {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Read(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -2877,7 +2877,7 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Read(iprot thrift.TProtoco
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) ReadField0(iprot thrift.TProtocol) error {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) ReadField0(iprot thrift.TProtocol) error {
 	p.Success = &Result_{}
 	if err := p.Success.Read(iprot); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
@@ -2885,8 +2885,8 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) ReadField0(iprot thrift.TP
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("saveDownFileInfo_result"); err != nil {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("saveDownLoadFileInfo_result"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -2903,7 +2903,7 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) Write(oprot thrift.TProtoc
 	return nil
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
@@ -2918,9 +2918,9 @@ func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) writeField0(oprot thrift.T
 	return err
 }
 
-func (p *MPDCDS_BackendServiceSaveDownFileInfoResult) String() string {
+func (p *MPDCDS_BackendServiceSaveDownLoadFileInfoResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownFileInfoResult(%+v)", *p)
+	return fmt.Sprintf("MPDCDS_BackendServiceSaveDownLoadFileInfoResult(%+v)", *p)
 }
