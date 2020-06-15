@@ -429,11 +429,11 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	}
 
 	if fileInfo.Status == 0 {
-		//获取文件真实地址
-		logger.GetLogger().Info("file_address", zap.String("file_address", fileInfo.Data["file_address"]))
-
 		//调用API,获取数据类型的根目录
 		var path string = fileInfo.Data["file_address"]
+
+		//获取文件真实地址
+		logger.GetLogger().Info("file_address" + ":" + path)
 
 		defer func() {
 			conn.lastFilePos = 0
