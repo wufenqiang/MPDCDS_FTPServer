@@ -210,21 +210,19 @@ func (conn *Conn) parseLine(line string) (string, string) {
 writeMessage will send a standard FTP response back to the client.
 */
 func (conn *Conn) writeMessage(code int, message string) (wrote int, err error) {
-	//conn.logger.PrintResponse(conn.sessionID, code, message)
-	conn.PrintResponse(conn.sessionID, code, message)
 	line := fmt.Sprintf("%d %s\r\n", code, message)
+
+	conn.PrintResponse(conn.sessionID, line)
+
 	wrote, err = conn.controlWriter.WriteString(line)
 	conn.controlWriter.Flush()
 	return
 }
-
-/**
-writeMessage will send a standard FTP response back to the client.
-*/
 func (conn *Conn) writeMessageMultiline(code int, message string) (wrote int, err error) {
-	//conn.logger.PrintResponse(conn.sessionID, code, message)
-	conn.PrintResponse(conn.sessionID, code, message)
 	line := fmt.Sprintf("%d-%s\r\n%d END\r\n", code, message, code)
+
+	conn.PrintResponse(conn.sessionID, line)
+
 	wrote, err = conn.controlWriter.WriteString(line)
 	conn.controlWriter.Flush()
 	return
@@ -325,11 +323,10 @@ func (conn *Conn) PrintReceive(sessionId string, command string, params string) 
 		}
 	}
 }
-func (conn *Conn) PrintResponse(sessionId string, code int, message string) {
-	resmsg := strconv.Itoa(code) + " " + message
+func (conn *Conn) PrintResponse(sessionId string, line string) {
 	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + resmsg)
+		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + line)
 	} else {
-		logger.GetLogger().Info(sessionId + " <<<<<< " + resmsg)
+		logger.GetLogger().Info(sessionId + " <<<<<< " + line)
 	}
 }

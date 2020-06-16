@@ -30,7 +30,6 @@ type DataSocket interface {
 	// the standard io.Closer interface
 	Close() error
 }
-
 type ftpActiveSocket struct {
 	conn *net.TCPConn
 	host string
@@ -40,9 +39,6 @@ type ftpActiveSocket struct {
 
 func newActiveSocket(remote string, port int, sessionID string) (DataSocket, error) {
 	connectTo := net.JoinHostPort(remote, strconv.Itoa(port))
-
-	//logger.Print(sessionID, "Opening active data connection to "+connectTo)
-	logger.GetLogger().Info(sessionID + " Opening active data connection to " + connectTo)
 
 	raddr, err := net.ResolveTCPAddr("tcp", connectTo)
 
@@ -65,6 +61,9 @@ func newActiveSocket(remote string, port int, sessionID string) (DataSocket, err
 	socket.host = remote
 	socket.port = port
 	//socket.logger = logger
+
+	//logger.Print(sessionID, "Opening newActiveSocket data connection to "+connectTo)
+	logger.GetLogger().Info(sessionID + " Opening newActiveSocket data connection " + tcpConn.LocalAddr().String() + " to " + connectTo)
 
 	return socket, nil
 }
@@ -143,6 +142,9 @@ func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig 
 		}
 		break
 	}
+
+	logger.GetLogger().Info(sessionID + " Opening newPassiveSocket data connection to " + socket.host + ":" + strconv.Itoa(socket.port))
+
 	return socket, err
 }
 func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {

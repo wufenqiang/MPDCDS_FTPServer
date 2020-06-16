@@ -9,7 +9,7 @@ import (
 
 func TestProtocolFactory(t *testing.T) {
 	pf := ProtocolFactory{"file://G:/tmp/id_rsa.pub"}
-	r, _ := pf.getData()
+	_, r, _ := pf.getData()
 
 	w, _ := os.Create("G:/tmp/test.pub")
 

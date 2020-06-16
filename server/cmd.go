@@ -1101,6 +1101,7 @@ func (cmd commandRest) Execute(conn *Conn, param string) {
 	var err error
 	conn.lastFilePos, err = strconv.ParseInt(param, 10, 64)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		conn.writeMessage(551, "File not available")
 		return
 	}
