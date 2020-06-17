@@ -3,6 +3,7 @@ package server
 import (
 	"MPDCDS_FTPServer/logger"
 	"crypto/tls"
+	"fmt"
 	"go.uber.org/zap"
 	"io"
 	"net"
@@ -63,7 +64,10 @@ func newActiveSocket(remote string, port int, sessionID string) (DataSocket, err
 	//socket.logger = logger
 
 	//logger.Print(sessionID, "Opening newActiveSocket data connection to "+connectTo)
-	logger.GetLogger().Info(sessionID + " Opening newActiveSocket data connection " + tcpConn.LocalAddr().String() + " to " + connectTo)
+	//logger.GetLogger().Info(sessionID + " (newActiveSocket)(" + tcpConn.LocalAddr().String() + ")======>(" + connectTo+")")
+
+	msg := fmt.Sprintf("[%s][%s][%s ======> %s]", sessionID, "Active", tcpConn.LocalAddr(), connectTo)
+	logger.GetLogger().Info(msg)
 
 	return socket, nil
 }
@@ -143,8 +147,10 @@ func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig 
 		break
 	}
 
-	logger.GetLogger().Info(sessionID + " Opening newPassiveSocket data connection to " + socket.host + ":" + strconv.Itoa(socket.port))
-
+	//logger.GetLogger().Info(sessionID + " Opening newPassiveSocket data connection to " + socket.host + ":" + strconv.Itoa(socket.port))
+	msg := fmt.Sprintf("[%s][%s][%s:%d ======> %s]", sessionID, "Passive", socket.host, socket.port, "???")
+	logger.GetLogger().Info(msg)
+	//logger.GetLogger().Info(sessionID + " (newPassiveSocket)(" + socket.host + ":" + strconv.Itoa(socket.port) + ")======>(???)")
 	return socket, err
 }
 func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {

@@ -181,9 +181,9 @@ func (conn *Conn) upgradeToTLS() error {
 receiveLine accepts a single line FTP command and co-ordinates an appropriate response.
 */
 func (conn *Conn) receiveLine(line string) {
-	command, param := conn.parseLine(line)
+	command, param := conn.analysisLine(line)
 	//conn.logger.PrintCommand(conn.sessionID, command, param)
-	conn.PrintReceive(conn.sessionID, command, param)
+	conn.PrintReceive(conn.sessionID, line)
 	cmdObj := commands[strings.ToUpper(command)]
 	if cmdObj == nil {
 		conn.writeMessage(500, "Command not found")
@@ -198,7 +198,10 @@ func (conn *Conn) receiveLine(line string) {
 	}
 }
 
-func (conn *Conn) parseLine(line string) (string, string) {
+/**
+分析获取到的信息，获取命令及参数
+*/
+func (conn *Conn) analysisLine(line string) (string, string) {
 	params := strings.SplitN(strings.Trim(line, "\r\n"), " ", 2)
 	if len(params) == 1 {
 		return params[0], ""
@@ -270,14 +273,14 @@ func (conn *Conn) sendOutofbandData(data []byte) {
 		conn.dataConn.Write(data)
 		conn.dataConn.Close()
 
-		if conf.Sysconfig.ShadeInLog {
-			logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + ")")
-		}
+		//if conf.Sysconfig.ShadeInLog {
+		//	logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + "------>)")
+		//}
 
 		conn.dataConn = nil
 	}
-
-	message := "Closing data connection, sent " + strconv.Itoa(bytes) + " bytes"
+	//message := "Closing data connection, sent " + strconv.Itoa(bytes) + " bytes"
+	message := fmt.Sprintf("Closing data connection, sent %d bytes", bytes)
 	conn.writeMessage(226, message)
 }
 
@@ -292,41 +295,41 @@ func (conn *Conn) sendOutofBandDataWriter(data io.ReadCloser) error {
 		conn.dataConn = nil
 		return err
 	}
-	message := "Closing data connection, sent " + strconv.Itoa(int(bytes)) + " bytes"
+	//message := "Closing data connection, sent " + strconv.Itoa(int(bytes)) + " bytes"
+	message := fmt.Sprintf("Closing data connection, sent %d bytes", bytes)
 	conn.writeMessage(226, message)
 	conn.dataConn.Close()
 
-	if conf.Sysconfig.ShadeInLog {
-		//println("conn.PublicIp()="+conn.PublicIp())
-		//println("conn.PassivePort()=" + strconv.Itoa(conn.PassivePort()))
-		//println("conn.passiveListenIP()=" + conn.passiveListenIP())
-
-		//远程连接命令端口
-		//println("conn.conn.RemoteAddr()="+conn.conn.RemoteAddr().String())
-		logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + "------>)")
-	}
+	//if conf.Sysconfig.ShadeInLog {
+	//	//println("conn.PublicIp()="+conn.PublicIp())
+	//	//println("conn.PassivePort()=" + strconv.Itoa(conn.PassivePort()))
+	//	//println("conn.passiveListenIP()=" + conn.passiveListenIP())
+	//
+	//	//远程连接命令端口
+	//	//println("conn.conn.RemoteAddr()="+conn.conn.RemoteAddr().String())
+	//	logger.GetLogger().Info(conn.sessionID + "(DataPort:" + conn.dataConn.Host() + ":" + strconv.Itoa(conn.dataConn.Port()) + "------>)")
+	//}
 
 	conn.dataConn = nil
 
 	return nil
 }
 
-func (conn *Conn) PrintReceive(sessionId string, command string, params string) {
-	recmsg := command + " " + params
+func (conn *Conn) PrintReceive(sessionId string, line string) {
+	var line0 string
 	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + recmsg)
-	} else {
-		if command == "PASS" {
-			logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") >>>>>> " + command + " " + "******(隐藏)")
+		if strings.Contains(line, "PASS") {
+			line0 = "PASS ******(隐藏)"
 		} else {
-			logger.GetLogger().Info(sessionId + " >>>>>> " + recmsg)
+			line0 = line
 		}
+	} else {
+		line0 = line
 	}
+	msg := fmt.Sprintf("[%s][%s %s %s:%d]%s", sessionId, conn.conn.RemoteAddr(), ">>>>>>", conn.server.Hostname, conn.server.Port, line0)
+	logger.GetLogger().Info(msg)
 }
 func (conn *Conn) PrintResponse(sessionId string, line string) {
-	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(sessionId + "(" + conn.conn.RemoteAddr().String() + ") <<<<<< (" + conn.server.Hostname + ":" + strconv.Itoa(conn.server.Port) + ")" + line)
-	} else {
-		logger.GetLogger().Info(sessionId + " <<<<<< " + line)
-	}
+	msg := fmt.Sprintf("[%s][%s %s %s:%d]%s", sessionId, conn.conn.RemoteAddr(), "<<<<<<", conn.server.Hostname, conn.server.Port, line)
+	logger.GetLogger().Info(msg)
 }

@@ -498,11 +498,13 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 			conn.user = conn.reqUser
 			conn.reqUser = ""
 			conn.token = auth.Token
+			var msg string
 			if conf.Sysconfig.ShadeInLog {
-				logger.GetLogger().Info("=token装载=" + auth.Token)
+				msg = fmt.Sprintf("token装载[%s]", "******(隐藏)")
 			} else {
-				logger.GetLogger().Info("=token装载=******(密文)")
+				msg = fmt.Sprintf("token装载[%s]", auth.Token)
 			}
+			logger.GetLogger().Info(msg)
 
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
@@ -1039,6 +1041,7 @@ func (cmd commandPasv) Execute(conn *Conn, param string) {
 //
 // The client has opened a listening socket for sending out of band data and
 // is requesting that we connect to it
+//主动模式的FTP是指服务器主动连接客户端的数据端口
 type commandPort struct{}
 
 func (cmd commandPort) IsExtend() bool {
