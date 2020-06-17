@@ -235,8 +235,9 @@ func (server *Server) ListenAndServe() error {
 		return err
 	}
 	server.feats = fmt.Sprintf(feats, curFeats)
-
-	logger.GetLogger().Info("Starting ftp server on " + server.Hostname + ":" + strconv.Itoa(server.Port))
+	//msg:=fmt.Sprintf("Starting ftp server on %s:%d\r\n",server.Hostname,server.Port)
+	msg := fmt.Sprintf("Starting ftp server on %s:%d-----------------------------------", server.Hostname, server.Port)
+	logger.GetLogger().Info(msg)
 
 	return server.Serve(listener)
 }

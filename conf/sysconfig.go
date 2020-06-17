@@ -20,6 +20,8 @@ func init() {
 }
 
 type sysconfig struct {
+	//
+	ProjectName string `json:"ProjectName"`
 
 	//thrift 服务ip
 	ThriftHost string `json:"ThriftHost"`

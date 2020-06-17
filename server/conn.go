@@ -115,11 +115,15 @@ cleaned up.
 */
 func (conn *Conn) Serve() {
 	//conn.logger.Print(conn.sessionID, "Connection Established")
+	var msg string
 	if conf.Sysconfig.ShadeInLog {
-		logger.GetLogger().Info(conn.sessionID + "(" + conn.conn.RemoteAddr().String() + ") Connection Established")
+		//msg=fmt.Sprintf("[%s][%s]%s\r\n",conn.sessionID,conn.conn.RemoteAddr(),"Connection Established")
+		msg = fmt.Sprintf("[%s][%s]%s", conn.sessionID, conn.conn.RemoteAddr(), "Connection Established")
 	} else {
-		logger.GetLogger().Info(conn.sessionID + " Connection Established")
+		//msg=fmt.Sprintf("[%s]%s\r\n",conn.sessionID,"Connection Established")
+		msg = fmt.Sprintf("[%s]%s", conn.sessionID, "Connection Established")
 	}
+	logger.GetLogger().Info(msg)
 
 	// send welcome
 	conn.writeMessage(220, conn.server.WelcomeMessage)
@@ -319,6 +323,7 @@ func (conn *Conn) PrintReceive(sessionId string, line string) {
 	var line0 string
 	if conf.Sysconfig.ShadeInLog {
 		if strings.Contains(line, "PASS") {
+			//line0 = "PASS ******(隐藏)\r\n"
 			line0 = "PASS ******(隐藏)"
 		} else {
 			line0 = line

@@ -499,10 +499,12 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 			conn.reqUser = ""
 			conn.token = auth.Token
 			var msg string
+			//format:="[%s]token装载[%s]\r\n"
+			format := "[%s]token装载[%s]"
 			if conf.Sysconfig.ShadeInLog {
-				msg = fmt.Sprintf("token装载[%s]", "******(隐藏)")
+				msg = fmt.Sprintf(format, conn.sessionID, "******(隐藏)")
 			} else {
-				msg = fmt.Sprintf("token装载[%s]", auth.Token)
+				msg = fmt.Sprintf(format, conn.sessionID, auth.Token)
 			}
 			logger.GetLogger().Info(msg)
 

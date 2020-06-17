@@ -31,6 +31,7 @@ type DataSocket interface {
 	// the standard io.Closer interface
 	Close() error
 }
+
 type ftpActiveSocket struct {
 	conn *net.TCPConn
 	host string
@@ -66,6 +67,7 @@ func newActiveSocket(remote string, port int, sessionID string) (DataSocket, err
 	//logger.Print(sessionID, "Opening newActiveSocket data connection to "+connectTo)
 	//logger.GetLogger().Info(sessionID + " (newActiveSocket)(" + tcpConn.LocalAddr().String() + ")======>(" + connectTo+")")
 
+	//msg := fmt.Sprintf("[%s][%s][%s ======> %s]\r\n", sessionID, "Active", tcpConn.LocalAddr(), connectTo)
 	msg := fmt.Sprintf("[%s][%s][%s ======> %s]", sessionID, "Active", tcpConn.LocalAddr(), connectTo)
 	logger.GetLogger().Info(msg)
 
@@ -148,6 +150,7 @@ func newPassiveSocket(host string, port func() int, sessionID string, tlsConfig 
 	}
 
 	//logger.GetLogger().Info(sessionID + " Opening newPassiveSocket data connection to " + socket.host + ":" + strconv.Itoa(socket.port))
+	//msg := fmt.Sprintf("[%s][%s][%s:%d ======> %s]\r\n", sessionID, "Passive", socket.host, socket.port, "???")
 	msg := fmt.Sprintf("[%s][%s][%s:%d ======> %s]", sessionID, "Passive", socket.host, socket.port, "???")
 	logger.GetLogger().Info(msg)
 	//logger.GetLogger().Info(sessionID + " (newPassiveSocket)(" + socket.host + ":" + strconv.Itoa(socket.port) + ")======>(???)")

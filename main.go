@@ -37,7 +37,6 @@ func main() {
 		Auth:     &server.SimpleAuth{},
 	}
 
-	//log.Printf("Username %v, Password %v", *user, *pass)
 	server := server.NewServer(opts)
 	err := server.ListenAndServe()
 	if err != nil {
