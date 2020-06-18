@@ -449,10 +449,13 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 		conn.writeMessage(551, "Error reading file")
 	}
 
-	if fileInfo.Status == 0 {
+	fileInfo0 := utils.FileInfo{fileInfo}
+
+	if fileInfo0.FileInfo2Status() == 0 {
 		//调用API,获取数据类型的根目录
 		//var path string = fileInfo.Data["file_address"]
-		var path string = utils.FileInfo2AbsPath(fileInfo)
+
+		var path string = fileInfo0.FileInfo2FileAddress()
 
 		//获取文件真实地址
 		logger.GetLogger().Info("file_address" + ":" + path)
@@ -473,8 +476,8 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 				//apidown.FileID = "bfc51fb5-2a41-4c24-8c2c-c05efeb2384e"
 				//apidown.AccessID = "6814f474-8e23-4949-a5ca-8e0de71a1666"
 
-				apidown.FileID = utils.FileInfo2FileID(fileInfo)
-				apidown.AccessID = utils.FileInfo2AccessId(fileInfo)
+				apidown.FileID = fileInfo0.FileInfo2FileID()
+				apidown.AccessID = fileInfo0.FileInfo2AccessId()
 
 				apidown.EndTime = utils.Now2TimeString()
 				tClient.SaveDownLoadFileInfo(ctx, conn.token, apidown)
@@ -509,7 +512,7 @@ func (cmd commandPass) RequireAuth() bool {
 func (cmd commandPass) Execute(conn *Conn, password string) {
 	var user = conn.reqUser
 
-	var auth, err = conn.server.Auth.CheckPasswd(user, password)
+	var status, token, err, resmsg = conn.server.Auth.CheckPasswd(user, password)
 
 	if err != nil {
 		// 用户信息不合法
@@ -517,23 +520,23 @@ func (cmd commandPass) Execute(conn *Conn, password string) {
 	} else {
 		// 用户信息合法
 
-		if auth.Status == 0 {
+		if status == 0 {
 			conn.user = conn.reqUser
 			conn.reqUser = ""
-			conn.token = auth.Token
+			conn.token = token
 			var msg string
 			//format:="[%s]token装载[%s]\r\n"
 			format := "[%s]token装载[%s]"
 			if conf.Sysconfig.ShadeInLog {
 				msg = fmt.Sprintf(format, conn.sessionID, "******(隐藏)")
 			} else {
-				msg = fmt.Sprintf(format, conn.sessionID, auth.Token)
+				msg = fmt.Sprintf(format, conn.sessionID, token)
 			}
 			logger.GetLogger().Info(msg)
 
 			conn.writeMessage(230, "Password ok, continue")
 		} else {
-			conn.writeMessage(530, auth.Msg)
+			conn.writeMessage(530, resmsg)
 		}
 	}
 }

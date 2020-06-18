@@ -5,6 +5,7 @@ import (
 	"MPDCDS_FTPServer/logger"
 	"MPDCDS_FTPServer/server"
 	"MPDCDS_FTPServer/thrift/client"
+	"MPDCDS_FTPServer/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -55,10 +56,12 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 		return err
 	}
 
-	if dirAuth.Status == 0 {
+	dirAuth0 := utils.DirAuth{dirAuth}
+
+	if dirAuth0.Status == 0 {
 		return nil
 	}
-	message := dirAuth.Msg
+	message := dirAuth0.DirAuth2Msg()
 	return errors.New(message)
 	//rPath := driver.realPath(path)
 	//f, err := os.Lstat(rPath)
