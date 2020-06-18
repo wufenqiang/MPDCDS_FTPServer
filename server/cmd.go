@@ -3,11 +3,12 @@ package server
 import (
 	"MPDCDS_FTPServer/conf"
 	"MPDCDS_FTPServer/logger"
+	"MPDCDS_FTPServer/thrift/MPDCDS_BackendService"
 	"MPDCDS_FTPServer/thrift/client"
+	"MPDCDS_FTPServer/utils"
 	"bytes"
 	"context"
 	"fmt"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
 	"time"
@@ -415,6 +416,11 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	//获取操作对象
 	tClient, tTransport := client.Connect()
 	ctx := context.Background()
+
+	//记录下载信息
+	apidown := MPDCDS_BackendService.NewApiDownLoad()
+	apidown.StartTime = utils.Now2TimeString()
+
 	pwd := conn.namePrefix
 	//pwd := conn.buildPath(param)
 	//param以/目录打头
@@ -429,12 +435,14 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	rs := []rune(path)
 	newPath := string(rs[0:a])
 	newFileName := string(rs[a+1 : len(path)])
-	newPathLog := zap.String("newPath", newPath)
-	newFileNameLog := zap.String("newFileName", newFileName)
-	logger.GetLogger().Info("newPath,newFileName", newPathLog, newFileNameLog)
+	//newPathLog := zap.String("newPath", newPath)
+	//newFileNameLog := zap.String("newFileName", newFileName)
+	//logger.GetLogger().Info("newPath,newFileName", newPathLog, newFileNameLog)
+
+	msg := fmt.Sprintf("newPath=%s,newFileName=%s", newPath, newFileName)
+	logger.GetLogger().Info(msg)
+
 	fileInfo, err0 := tClient.File(ctx, conn.token, newPath, newFileName)
-	//关闭tTransport
-	client.Close(tTransport)
 
 	if err0 != nil {
 		logger.GetLogger().Error(err0.Error())
@@ -443,7 +451,8 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 
 	if fileInfo.Status == 0 {
 		//调用API,获取数据类型的根目录
-		var path string = fileInfo.Data["file_address"]
+		//var path string = fileInfo.Data["file_address"]
+		var path string = utils.FileInfo2AbsPath(fileInfo)
 
 		//获取文件真实地址
 		logger.GetLogger().Info("file_address" + ":" + path)
@@ -459,6 +468,16 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 			err2 := conn.sendOutofBandDataWriter(data)
 			if err2 != nil {
 				conn.writeMessage(551, "Error reading file")
+			} else {
+
+				//apidown.FileID = "bfc51fb5-2a41-4c24-8c2c-c05efeb2384e"
+				//apidown.AccessID = "6814f474-8e23-4949-a5ca-8e0de71a1666"
+
+				apidown.FileID = utils.FileInfo2FileID(fileInfo)
+				apidown.AccessID = utils.FileInfo2AccessId(fileInfo)
+
+				apidown.EndTime = utils.Now2TimeString()
+				tClient.SaveDownLoadFileInfo(ctx, conn.token, apidown)
 			}
 		} else {
 			conn.writeMessage(551, "File not available")
@@ -468,6 +487,10 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 		//未获取到文件真实地址
 		conn.writeMessage(551, fileInfo.Msg)
 	}
+
+	//关闭tTransport
+	client.Close(tTransport)
+
 }
 
 //认证密码
