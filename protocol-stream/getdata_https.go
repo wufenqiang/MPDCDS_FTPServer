@@ -1,8 +1,6 @@
-package filedriver
-
-import "MPDCDS_FTPServer/utils"
+package protocol_stream
 
 func (pf *ProtocolFactory) GetData_https() ReturnType {
-	s, f, e := utils.HttpGet(pf.path)
+	s, f, e := HttpGet(pf.path)
 	return ReturnType{s, f, e}
 }

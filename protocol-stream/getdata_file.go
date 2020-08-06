@@ -1,9 +1,9 @@
-package filedriver
+package protocol_stream
 
 import "os"
 
 func (pf *ProtocolFactory) GetData_file() ReturnType {
-	path, e0 := pf.thePath()
+	path, e0 := pf.ThePath()
 	if e0 != nil {
 		return ReturnType{0, nil, e0}
 	}

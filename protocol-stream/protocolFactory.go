@@ -1,8 +1,9 @@
-package filedriver
+package protocol_stream
 
 import (
 	"github.com/pkg/errors"
 	"io"
+	"path/filepath"
 	"reflect"
 
 	"strings"
@@ -11,6 +12,22 @@ import (
 func ReadFile(path string) (int64, io.ReadCloser, error) {
 	pf := ProtocolFactory{path}
 	return pf.getData()
+}
+func FtpRelativePath2AbsoluteURL(RootPath string, FtpPath string) string {
+	/**
+	通过API获取数据的真实路径
+	*/
+	//var RootPath string = "/tmp"
+	p := ProtocolFactory{FtpPath}
+	var head, _ = p.Head()
+	var thepath, _ = p.ThePath()
+
+	paths := strings.Split(thepath, "/")
+
+	protocolSplit := p.ProtocolSplit()
+
+	finalpath := head + protocolSplit + filepath.Join(append([]string{RootPath}, paths...)...)
+	return finalpath
 }
 
 type ReturnType struct {
@@ -27,7 +44,7 @@ const protocolSplit = "://"
 func (pf *ProtocolFactory) ProtocolSplit() string {
 	return protocolSplit
 }
-func (pf *ProtocolFactory) head() (head string, err error) {
+func (pf *ProtocolFactory) Head() (head string, err error) {
 	if strings.Contains(pf.path, protocolSplit) {
 		head := strings.Split(pf.path, protocolSplit)[0]
 		if head == "" {
@@ -41,13 +58,13 @@ func (pf *ProtocolFactory) head() (head string, err error) {
 		panic(pf.path + "没有找到协议头规格信息,eg:[file://][http://]")
 	}
 }
-func (pf *ProtocolFactory) thePath() (thepath string, err error) {
-	head, e0 := pf.head()
+func (pf *ProtocolFactory) ThePath() (thepath string, err error) {
+	head, e0 := pf.Head()
 	thepath = strings.SplitAfter(pf.path, head+protocolSplit)[1]
 	return thepath, e0
 }
 func (pf *ProtocolFactory) getData() (int64, io.ReadCloser, error) {
-	head, e0 := pf.head()
+	head, e0 := pf.Head()
 	if e0 != nil {
 		return 0, nil, e0
 	}

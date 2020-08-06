@@ -2,8 +2,10 @@ package filedriver
 
 import (
 	"MPDCDS_FTPServer/conf"
+	"MPDCDS_FTPServer/ftp-server"
 	"MPDCDS_FTPServer/logger"
-	"MPDCDS_FTPServer/server"
+	"MPDCDS_FTPServer/protocol-stream"
+
 	"MPDCDS_FTPServer/thrift/client"
 	"MPDCDS_FTPServer/utils"
 	"context"
@@ -18,27 +20,29 @@ import (
 
 type FileDriver struct {
 	//RootPath string
-	server.Perm
+	ftp_server.Perm
 }
 
-func (driver *FileDriver) RealPath(path string) string {
-	/**
-	通过API获取数据的真实路径
-	*/
-	//var RootPath string = "/tmp"
-	p := ProtocolFactory{path}
-	var head, _ = p.head()
-	var thepath, _ = p.thePath()
+func (driver *FileDriver) RealPath(FtpRelativePath string) string {
+	///**
+	//通过API获取数据的真实路径
+	//*/
+	////var RootPath string = "/tmp"
+	//p := protocol_stream.ProtocolFactory{path0}
+	//var head, _ = p.Head()
+	//var thepath, _ = p.ThePath()
+	//var RootPath string = conf.Sysconfig.NetworkDisk
+	//
+	//paths := strings.Split(thepath, "/")
+	//
+	//protocolSplit := p.ProtocolSplit()
+	//
+	//finalpath := head + protocolSplit + filepath.Join(append([]string{RootPath}, paths...)...)
+	//return finalpath
 	var RootPath string = conf.Sysconfig.NetworkDisk
-
-	paths := strings.Split(thepath, "/")
-
-	protocolSplit := p.ProtocolSplit()
-
-	finalpath := head + protocolSplit + filepath.Join(append([]string{RootPath}, paths...)...)
-	return finalpath
+	return protocol_stream.FtpRelativePath2AbsoluteURL(RootPath, FtpRelativePath)
 }
-func (driver *FileDriver) Init(conn *server.Conn) {
+func (driver *FileDriver) Init(conn *ftp_server.Conn) {
 	//driver.conn = conn
 }
 func (driver *FileDriver) ChangeDir(path string, token string) error {
@@ -73,7 +77,7 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 	//}
 	//return errors.New("Not a directory")
 }
-func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
+func (driver *FileDriver) Stat(path string) (ftp_server.FileInfo, error) {
 	basepath := driver.RealPath(path)
 	rPath, err := filepath.Abs(basepath)
 	if err != nil {
@@ -100,7 +104,7 @@ func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
 	}
 	return &FileInfo{f, mode, owner, group}, nil
 }
-func (driver *FileDriver) ListDir(path string, callback func(server.FileInfo) error) error {
+func (driver *FileDriver) ListDir(path string, callback func(ftp_server.FileInfo) error) error {
 	basepath := driver.RealPath(path)
 	return filepath.Walk(basepath, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -173,7 +177,7 @@ func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadClos
 		rPath = path
 	}
 
-	s, f, e0 := ReadFile(rPath)
+	s, f, e0 := protocol_stream.ReadFile(rPath)
 	if e0 != nil {
 		return s, f, e0
 	}
@@ -273,9 +277,9 @@ func (f *FileInfo) Group() string {
 
 type FileDriverFactory struct {
 	//RootPath string
-	server.Perm
+	ftp_server.Perm
 }
 
-func (factory *FileDriverFactory) NewDriver() (server.Driver, error) {
+func (factory *FileDriverFactory) NewDriver() (ftp_server.Driver, error) {
 	return &FileDriver{ /*factory.RootPath,*/ factory.Perm}, nil
 }

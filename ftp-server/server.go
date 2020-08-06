@@ -1,7 +1,8 @@
-package server
+package ftp_server
 
 import (
 	"MPDCDS_FTPServer/logger"
+	"MPDCDS_FTPServer/service"
 	"bufio"
 	"context"
 	"crypto/tls"
@@ -26,7 +27,7 @@ type ServerOpts struct {
 	// each client connection. This is a mandatory option.
 	Factory DriverFactory
 
-	Auth Auth
+	Auth service.Auth
 
 	// Server Name, Default is Go Ftp Server
 	Name string

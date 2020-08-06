@@ -1,4 +1,4 @@
-package server
+package ftp_server
 
 import (
 	"MPDCDS_FTPServer/logger"

@@ -9,7 +9,8 @@ package main
 import (
 	"MPDCDS_FTPServer/conf"
 	"MPDCDS_FTPServer/file-driver"
-	"MPDCDS_FTPServer/server"
+	"MPDCDS_FTPServer/ftp-server"
+	"MPDCDS_FTPServer/service"
 	"MPDCDS_FTPServer/utils"
 	"flag"
 	"log"
@@ -27,17 +28,17 @@ func main() {
 	flag.Parse()
 
 	factory := &filedriver.FileDriverFactory{
-		Perm: server.NewSimplePerm("user", "group"),
+		Perm: ftp_server.NewSimplePerm("user", "group"),
 	}
 
-	opts := &server.ServerOpts{
+	opts := &ftp_server.ServerOpts{
 		Factory:  factory,
 		Port:     *port,
 		Hostname: *host,
-		Auth:     &server.SimpleAuth{},
+		Auth:     &service.SimpleAuth{},
 	}
 
-	server := server.NewServer(opts)
+	server := ftp_server.NewServer(opts)
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal("Error starting server:", err)

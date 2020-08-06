@@ -12,7 +12,7 @@ import (
 
 func TestRealPath(t *testing.T) {
 	factory := &FileDriverFactory{
-		Perm: server.NewSimplePerm("user", "group"),
+		Perm: ftp_server.NewSimplePerm("user", "group"),
 	}
 	driver, _ := factory.NewDriver()
 
