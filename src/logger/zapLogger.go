@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"MPDCDS_FTPServer/conf"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"MPDCDS_FTPServer/src/conf"
+	"github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
@@ -80,7 +80,7 @@ func getWriter(FilePathName string) io.Writer {
 	// 生成rotatelogs的Logger 实际生成的文件名 demo.log.YYmmddHH
 	// demo.log是指向最新日志的链接
 	hook, err := rotatelogs.New(
-		FilePathName+conf.Sysconfig.ProjectName+"_%Y%m%d"+".log", // 没有使用go风格反人类的format格式.%Y%m%d%H
+		FilePathName+conf.ProjectName+"_%Y%m%d"+".log", // 没有使用go风格反人类的format格式.%Y%m%d%H
 		//rotatelogs.WithLinkName(FilePathName),//// 生成软链，指向最新日志文件
 		rotatelogs.WithMaxAge(time.Hour*24*30),    // 保存30天
 		rotatelogs.WithRotationTime(time.Hour*24), //切割频率 24小时

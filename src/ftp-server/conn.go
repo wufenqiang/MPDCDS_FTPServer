@@ -1,8 +1,8 @@
 package ftp_server
 
 import (
-	"MPDCDS_FTPServer/conf"
-	"MPDCDS_FTPServer/logger"
+	"MPDCDS_FTPServer/src/conf"
+	"MPDCDS_FTPServer/src/logger"
 	"bufio"
 	"crypto/rand"
 	"crypto/sha256"

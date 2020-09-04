@@ -1,6 +1,4 @@
 {
-  "ProjectName": "MPDCDS_FTPServer",
-
   "ThriftHost":"127.0.0.1",
   "ThriftPort": "19090",
 

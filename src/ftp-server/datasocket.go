@@ -1,7 +1,7 @@
 package ftp_server
 
 import (
-	"MPDCDS_FTPServer/logger"
+	"MPDCDS_FTPServer/src/logger"
 	"crypto/tls"
 	"fmt"
 	"go.uber.org/zap"

@@ -1,27 +1,6 @@
 package conf
 
-import (
-	"github.com/json-iterator/go"
-	"io/ioutil"
-)
-
-var Sysconfig = &sysconfig{}
-
-func init() {
-	//指定对应的json配置文件
-	b, err := ioutil.ReadFile("config.json")
-	if err != nil {
-		panic("Sys config read err")
-	}
-	err = jsoniter.Unmarshal(b, Sysconfig)
-	if err != nil {
-		panic(err)
-	}
-}
-
 type sysconfig struct {
-	//
-	ProjectName string `json:"ProjectName"`
 
 	//thrift 服务ip
 	ThriftHost string `json:"ThriftHost"`
@@ -42,3 +21,5 @@ type sysconfig struct {
 	//网盘根目录
 	NetworkDisk string `json:NetworkDisk`
 }
+
+const ProjectName = "MPDCDS_FTPServer"

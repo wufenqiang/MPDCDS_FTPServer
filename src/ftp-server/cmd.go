@@ -1,14 +1,14 @@
 package ftp_server
 
 import (
-	"MPDCDS_FTPServer/conf"
-	"MPDCDS_FTPServer/logger"
-	"MPDCDS_FTPServer/thrift/MPDCDS_BackendService"
-	"MPDCDS_FTPServer/thrift/client"
-	"MPDCDS_FTPServer/utils"
+	"MPDCDS_FTPServer/src/conf"
+	"MPDCDS_FTPServer/src/logger"
+	"MPDCDS_FTPServer/src/thrift/thrift-client"
 	"bytes"
 	"context"
 	"fmt"
+	"gitlab.weather.com.cn/wufenqiang/MPDCDSPro/src/thrift/thriftcore"
+	"gitlab.weather.com.cn/wufenqiang/MPDCDSPro/src/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -208,16 +208,20 @@ func (cmd commandMlsd) Execute(conn *Conn, param string) {
 	pwd := conn.buildPath(parseListParam(param))
 
 	//获取操作对象
-	tClient, tTransport := client.Connect()
+	//tClient, tTransport := utils.ThriftConnect()
+
+	listInfo := thriftcore.NewListsInfo()
+	listInfo.Token = conn.token
+	listInfo.Pwd = pwd
 
 	//获取操作对象
-	res, err := tClient.Lists(context.Background(), conn.token, pwd)
+	res, err := thrift_client.ThriftClient.Lists(context.Background(), listInfo)
 	if err != nil {
 		conn.writeMessage(550, err.Error())
 		return
 	}
 	//关闭tTransport
-	defer client.Close(tTransport)
+	defer thrift_client.ThriftClose()
 	fmt.Println("command mlsd res", res)
 
 	var buf bytes.Buffer
@@ -256,16 +260,20 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	pwd := conn.buildPath(parseListParam(param))
 
 	//获取操作对象
-	tClient, tTransport := client.Connect()
+	//tClient, tTransport := utils.ThriftConnect()
+
+	listInfo := thriftcore.NewListsInfo()
+	listInfo.Token = conn.token
+	listInfo.Pwd = pwd
 
 	//获取操作对象
-	res, err := tClient.Lists(context.Background(), conn.token, pwd)
+	res, err := thrift_client.ThriftClient.Lists(context.Background(), listInfo)
 	if err != nil {
 		conn.writeMessage(550, err.Error())
 		return
 	}
 	//关闭tTransport
-	defer client.Close(tTransport)
+	defer thrift_client.ThriftClose()
 
 	var buf bytes.Buffer
 	for _, e := range res.Data {
@@ -351,17 +359,18 @@ func (cmd commandNlst) Execute(conn *Conn, param string) {
 	//自定义实现，根据path调用后台API获取FileNames
 	pwd := conn.buildPath(parseListParam(param))
 
-	//获取操作对象
-	tClient, tTransport := client.Connect()
+	listInfo := thriftcore.NewListsInfo()
+	listInfo.Token = conn.token
+	listInfo.Pwd = pwd
 
 	//获取操作对象
-	res, err := tClient.Lists(context.Background(), conn.token, pwd)
+	res, err := thrift_client.ThriftClient.Lists(context.Background(), listInfo)
 	if err != nil {
 		conn.writeMessage(550, err.Error())
 		return
 	}
 	//关闭tTransport
-	defer client.Close(tTransport)
+	defer thrift_client.ThriftClose()
 
 	var buf bytes.Buffer
 	for _, e := range res.Data {
@@ -414,11 +423,12 @@ func (cmd commandRetr) RequireAuth() bool {
 }
 func (cmd commandRetr) Execute(conn *Conn, param string) {
 	//获取操作对象
-	tClient, tTransport := client.Connect()
+	//tClient, tTransport := utils.ThriftConnect()
+
 	ctx := context.Background()
 
 	//记录下载信息
-	apidown := MPDCDS_BackendService.NewApiDownLoad()
+	apidown := thriftcore.NewSaveDownloadInfo()
 	apidown.StartTime = utils.Now2TimeString()
 
 	pwd := conn.namePrefix
@@ -442,14 +452,19 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 	msg := fmt.Sprintf("newPath=%s,newFileName=%s", newPath, newFileName)
 	logger.GetLogger().Info(msg)
 
-	fileInfo, err0 := tClient.File(ctx, conn.token, newPath, newFileName)
+	fileInfo := thriftcore.NewFileInfo()
+	fileInfo.Token = conn.token
+	fileInfo.AbsPath = newPath
+	fileInfo.FileName = newFileName
+
+	fileReturn, err0 := thrift_client.ThriftClient.File(ctx, fileInfo)
 
 	if err0 != nil {
 		logger.GetLogger().Error(err0.Error())
 		conn.writeMessage(551, "Error reading file")
 	}
 
-	fileInfo0 := utils.FileInfo{fileInfo}
+	fileInfo0 := thrift_client.FileReturn{fileReturn}
 
 	if fileInfo0.FileInfo2Status() == 0 {
 		//调用API,获取数据类型的根目录
@@ -478,9 +493,9 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 
 				apidown.FileID = fileInfo0.FileInfo2FileID()
 				apidown.AccessID = fileInfo0.FileInfo2AccessId()
-
 				apidown.EndTime = utils.Now2TimeString()
-				tClient.SaveDownLoadFileInfo(ctx, conn.token, apidown)
+				apidown.Token = conn.token
+				thrift_client.ThriftClient.SaveDownload(ctx, apidown)
 			}
 		} else {
 			conn.writeMessage(551, "File not available")
@@ -488,11 +503,11 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 
 	} else {
 		//未获取到文件真实地址
-		conn.writeMessage(551, fileInfo.Msg)
+		conn.writeMessage(551, fileReturn.Msg)
 	}
 
 	//关闭tTransport
-	client.Close(tTransport)
+	thrift_client.ThriftClose()
 
 }
 

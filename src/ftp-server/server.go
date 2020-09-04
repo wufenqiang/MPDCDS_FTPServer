@@ -1,8 +1,8 @@
 package ftp_server
 
 import (
-	"MPDCDS_FTPServer/logger"
-	"MPDCDS_FTPServer/service"
+	"MPDCDS_FTPServer/src/logger"
+	"MPDCDS_FTPServer/src/service"
 	"bufio"
 	"context"
 	"crypto/tls"

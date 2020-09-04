@@ -1,7 +1,8 @@
-package filedriver
+package test
 
 import (
-	"MPDCDS_FTPServer/server"
+	"MPDCDS_FTPServer/src/file-driver"
+	"MPDCDS_FTPServer/src/ftp-server"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestRealPath(t *testing.T) {
-	factory := &FileDriverFactory{
+	factory := &file_driver.FileDriverFactory{
 		Perm: ftp_server.NewSimplePerm("user", "group"),
 	}
 	driver, _ := factory.NewDriver()

@@ -7,27 +7,27 @@
 package main
 
 import (
-	"MPDCDS_FTPServer/conf"
-	"MPDCDS_FTPServer/file-driver"
-	"MPDCDS_FTPServer/ftp-server"
-	"MPDCDS_FTPServer/service"
-	"MPDCDS_FTPServer/utils"
+	"MPDCDS_FTPServer/src/conf"
+	"MPDCDS_FTPServer/src/file-driver"
+	"MPDCDS_FTPServer/src/ftp-server"
+	"MPDCDS_FTPServer/src/logger"
+	"MPDCDS_FTPServer/src/service"
 	"flag"
-	"log"
 )
 
 func main() {
 
-	ftpip, _ := utils.ExternalIP()
+	//ftpip, _ := utils.ExternalIP()
 	var (
 		//root = flag.String("root", "/tmp", "Root directory to serve")
 		port = flag.Int("port", conf.Sysconfig.FTPCmdPort, "Port")
 		//host = flag.String("host", conf.Sysconfig.FTPHost, "Host")
-		host = flag.String("host", ftpip.String(), "Host")
+		//host = flag.String("host", ftpip.String(), "Host")
+		host = flag.String("host", "0.0.0.0", "Host")
 	)
 	flag.Parse()
 
-	factory := &filedriver.FileDriverFactory{
+	factory := &file_driver.FileDriverFactory{
 		Perm: ftp_server.NewSimplePerm("user", "group"),
 	}
 
@@ -41,6 +41,11 @@ func main() {
 	server := ftp_server.NewServer(opts)
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Fatal("Error starting server:", err)
+		logger.GetLogger().Fatal("Error starting server:" + err.Error())
 	}
 }
+
+//func init()  {
+//	thrifthostport:=net.JoinHostPort(conf.Sysconfig.ThriftHost, conf.Sysconfig.ThriftPort)
+//	thrift_client.ConnectHostPort(thrifthostport)
+//}

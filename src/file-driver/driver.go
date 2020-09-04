@@ -1,13 +1,13 @@
-package filedriver
+package file_driver
 
 import (
-	"MPDCDS_FTPServer/conf"
-	"MPDCDS_FTPServer/ftp-server"
-	"MPDCDS_FTPServer/logger"
-	"MPDCDS_FTPServer/protocol-stream"
+	"MPDCDS_FTPServer/src/conf"
+	"MPDCDS_FTPServer/src/ftp-server"
+	"MPDCDS_FTPServer/src/logger"
+	"MPDCDS_FTPServer/src/thrift/thrift-client"
+	"gitlab.weather.com.cn/wufenqiang/MPDCDSPro/src/protocol-stream"
+	"gitlab.weather.com.cn/wufenqiang/MPDCDSPro/src/thrift/thriftcore"
 
-	"MPDCDS_FTPServer/thrift/client"
-	"MPDCDS_FTPServer/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -50,17 +50,22 @@ func (driver *FileDriver) ChangeDir(path string, token string) error {
 	if ext != "" {
 		return errors.New("Not a directory")
 	}
+
+	dirAuthInfo := thriftcore.NewDirAuthInfo()
+	dirAuthInfo.Token = token
+	dirAuthInfo.AbsPath = path
+
 	//获取操作对象
-	tClient, tTransport := client.Connect()
+	//tClient, tTransport := utils.ThriftConnect()
 	ctx := context.Background()
-	dirAuth, err := tClient.DirAuth(ctx, token, path)
+	dirAuth, err := thrift_client.ThriftClient.DirAuth(ctx, dirAuthInfo)
 	//关闭tTransport
-	client.Close(tTransport)
+	thrift_client.ThriftClose()
 	if err != nil {
 		return err
 	}
 
-	dirAuth0 := utils.DirAuth{dirAuth}
+	dirAuth0 := thrift_client.DirAuthReturn{dirAuth}
 
 	if dirAuth0.Status == 0 {
 		return nil
@@ -177,7 +182,7 @@ func (driver *FileDriver) GetFile(path string, offset int64) (int64, io.ReadClos
 		rPath = path
 	}
 
-	s, f, e0 := protocol_stream.ReadFile(rPath)
+	s, f, e0 := protocol_stream.ReadProtocol(rPath)
 	if e0 != nil {
 		return s, f, e0
 	}

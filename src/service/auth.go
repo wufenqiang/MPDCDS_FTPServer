@@ -1,9 +1,9 @@
 package service
 
 import (
-	"MPDCDS_FTPServer/thrift/client"
-	"MPDCDS_FTPServer/utils"
+	"MPDCDS_FTPServer/src/thrift/thrift-client"
 	"context"
+	"gitlab.weather.com.cn/wufenqiang/MPDCDSPro/src/thrift/thriftcore"
 )
 
 // Auth is an interface to auth your ftp user login.
@@ -24,13 +24,15 @@ type SimpleAuth struct {
 // CheckPasswd will check user's password
 func (a *SimpleAuth) CheckPasswd(user string, password string) (int16, string, error, string) {
 
-	tClient, tTransport := client.Connect()
 	ctx := context.Background()
-	auth, err := tClient.Auth(ctx, user, password)
+	authInfo := thriftcore.NewAuthInfo()
+	authInfo.User = user
+	authInfo.Password = password
+	auth, err := thrift_client.ThriftClient.Auth(ctx, authInfo)
 	//关闭tTransport
-	client.Close(tTransport)
+	thrift_client.ThriftClose()
 
-	auth0 := utils.Auth{auth}
+	auth0 := thrift_client.AuthReturn{auth}
 	status := auth0.Auth2Status()
 	msg := auth0.Auth2Msg()
 	token := auth0.Auth2Token()
